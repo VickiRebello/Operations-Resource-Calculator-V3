@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Headcount Planner</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f4f2; color: #1a1a1a; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f0ede8; }
+    ::-webkit-scrollbar-thumb { background: #d0cbc4; border-radius: 3px; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+    .tab { background:none; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:500; padding:11px 16px; color:#9a918a; border-bottom:2px solid transparent; transition:all 0.15s; }
+    .tab.on { color:#e8590c; border-bottom-color:#e8590c; }
+    .tab:hover:not(.on) { color:#333; }
+    .pi { width:88px; background:#fff; border:1.5px solid #ddd9d3; color:#1a1a1a; font-family:inherit; font-size:13.5px; padding:7px 9px; border-radius:7px; transition:border 0.15s; }
+    .pi:focus { outline:none; border-color:#e8590c; box-shadow:0 0 0 3px rgba(232,89,12,0.1); }
+    .ti { background:#fff; border:1.5px solid #ddd9d3; color:#1a1a1a; font-family:inherit; font-size:12.5px; padding:5px 8px; border-radius:6px; transition:border 0.15s; }
+    .ti:focus { outline:none; border-color:#e8590c; }
+    .vi { width:56px; background:#fafaf9; border:1px solid #ddd9d3; color:#1a1a1a; font-family:inherit; font-size:12px; padding:3px 6px; border-radius:5px; text-align:right; transition:border 0.15s; }
+    .vi:focus { outline:none; border-color:#e8590c; }
+    .cdot { -webkit-appearance:none; appearance:none; border:none; padding:0; cursor:pointer; border-radius:50%; overflow:hidden; background:none; }
+    .cdot::-webkit-color-swatch-wrapper { padding:0; }
+    .cdot::-webkit-color-swatch { border:1px solid rgba(0,0,0,0.12); border-radius:50%; }
+    .cdot::-moz-color-swatch { border:1px solid rgba(0,0,0,0.12); border-radius:50%; }
+    .lxs { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#a09488; margin-bottom:10px; }
+    .rm { background:none; border:none; cursor:pointer; color:#c8c0b8; font-size:17px; line-height:1; padding:0 2px; transition:color 0.15s; }
+    .rm:hover { color:#e03131; }
+    .atb { background:none; border:1.5px dashed #d4cfc8; color:#a09488; font-family:inherit; font-size:12px; padding:5px 12px; border-radius:6px; cursor:pointer; transition:all 0.15s; }
+    .atb:hover { border-color:#e8590c; color:#e8590c; }
+    .upb { background:#fff; border:1.5px solid #ddd9d3; color:#5a524c; font-family:inherit; font-size:12px; font-weight:500; padding:6px 13px; border-radius:7px; cursor:pointer; transition:all 0.15s; }
+    .upb:hover { border-color:#e8590c; color:#e8590c; }
+    .tgb { background:#fff; border:1.5px solid #ddd9d3; color:#7a7168; font-family:inherit; font-size:12px; font-weight:500; padding:5px 12px; border-radius:6px; cursor:pointer; transition:all 0.15s; }
+    .tgb.on { background:#e8590c; border-color:#e8590c; color:#fff; }
+    .tgb:hover:not(.on) { border-color:#999; color:#333; }
+    .wt { border-collapse:collapse; width:100%; font-size:12px; }
+    .wt th { background:#f5f3f0; color:#9a918a; font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:8px 10px; text-align:center; position:sticky; top:0; z-index:2; border-bottom:1.5px solid #e5e2dd; white-space:nowrap; }
+    .wt th.hc { text-align:left; padding-left:14px; position:sticky; left:0; z-index:3; }
+    .wt td { padding:0; border-bottom:1px solid #f0ede8; text-align:center; }
+    .wt td.hl { text-align:left; padding:5px 10px 5px 14px; color:#9a918a; font-size:11px; white-space:nowrap; background:#fafaf8; position:sticky; left:0; z-index:1; border-right:1px solid #e8e3dc; font-weight:500; }
+    .wt tr:hover td { background-color:rgba(0,0,0,0.015); }
+    .wt tr:hover td.hl { background:#f5f3f0; }
+    .ci { padding:5px 8px; font-size:12px; font-weight:600; color:#1a1a1a; }
+    .ce { color:#d0cbc4; font-size:11px; padding:5px 8px; }
+    .tr-tot td { background:#f5f3f0 !important; font-weight:700; border-top:1.5px solid #e5e2dd; }
+    .tr-tot td.hl { background:#ece8e2 !important; }
+    .chip { background:#fff8f5; border:1px solid #fbd5be; border-radius:6px; padding:5px 11px; font-size:11.5px; }
+    .card { background:#fff; border:1px solid #e5e2dd; border-radius:10px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const HOURS = Array.from({ length: 24 }, (_, i) => {
+      const h = i % 12 === 0 ? 12 : i % 12;
+      return `${h}${i < 12 ? "am" : "pm"}`;
+    });
+    const TEAM_COLORS = ["#e8590c", "#2f9e44", "#1971c2", "#9c36b5", "#c92a2a"];
+
+    const defaultVolumes = () => {
+      const v = {};
+      DAYS.forEach(d => { v[d] = {}; HOURS.forEach(h => { v[d][h] = ""; }); });
+      return v;
+    };
+
+    function formatNum(n) {
+      if (isNaN(n) || !isFinite(n)) return "—";
+      return Number.isInteger(n) ? n : n.toFixed(2);
+    }
+    function ceilInt(n) {
+      if (isNaN(n) || !isFinite(n) || n <= 0) return null;
+      return Math.ceil(n);
+    }
+    function ceil2(n) {
+      return isNaN(n) || !isFinite(n) ? 0 : Math.ceil(n * 100) / 100;
+    }
+    // Parse dates flexibly — UK DD/MM/YYYY takes priority over US MM/DD/YYYY
+    function parseFlexDate(s) {
+      if (!s) return null;
+      s = String(s).trim();
+      if (!s) return null;
+      let m = s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);      // YYYY-MM-DD
+      if (m) { const d = new Date(+m[1], +m[2]-1, +m[3]); return isNaN(d) ? null : d; }
+      m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);        // DD/MM/YYYY
+      if (m) {
+        let y = +m[3]; if (y < 100) y += 2000;
+        const day = +m[1], mon = +m[2];
+        if (mon < 1 || mon > 12 || day < 1 || day > 31) return null;
+        const d = new Date(y, mon-1, day);
+        return isNaN(d) ? null : d;
+      }
+      const d = new Date(s);
+      return isNaN(d) ? null : d;
+    }
+    function fmtDateKey(d) {
+      const p = n => String(n).padStart(2, "0");
+      return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
+    }
+
+    // ── Erlang C: sizing for live queues where callers wait ──
+    function erlangC(N, A) {
+      if (N <= A) return 1;
+      let s = 0, t = 1;
+      for (let k = 0; k < N; k++) { if (k > 0) t *= A / k; s += t; }
+      const top = (t * A / N) * (N / (N - A));
+      return top / (s + top);
+    }
+    // Average speed of answer, in seconds
+    function asaSeconds(N, A, ahtMin) {
+      if (N <= A) return Infinity;
+      return erlangC(N, A) * ahtMin * 60 / (N - A);
+    }
+    // Agents to roster so ASA meets target, grossed up for shrinkage/admin
+    function queueAgents(tasksPerHour, ahtMin, targetAsaSec, availFraction) {
+      if (!tasksPerHour || tasksPerHour <= 0 || ahtMin <= 0 || availFraction <= 0) return 0;
+      const A = tasksPerHour * ahtMin / 60;
+      let N = Math.floor(A) + 1, guard = 0;
+      while (asaSeconds(N, A, ahtMin) > targetAsaSec && guard++ < 400) N++;
+      return Math.ceil(N / availFraction);
+    }
+
+    function heatColor(ratio) {
+      if (!ratio || ratio <= 0) return "transparent";
+      const alpha = 0.1 + Math.min(1, ratio) * 0.5;
+      return `rgba(232,89,12,${alpha.toFixed(2)})`;
+    }
+
+    function App() {
+      const [taskTypes, setTaskTypes] = useState([
+        { id: "t1", name: "Calls",   aht: 5, color: "#e8590c", queued: true,  asaTarget: 60,
+          rework: false, reworkPct: { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 } },
+        { id: "t2", name: "Tickets", aht: 8, color: "#1971c2", queued: false, asaTarget: 60,
+          rework: true,  reworkPct: { Mon:10, Tue:10, Wed:10, Thu:10, Fri:10, Sat:25, Sun:35 } },
+      ]);
+      const [activeTaskType, setActiveTaskType] = useState("t1");
+      const [volumes, setVolumes] = useState({ t1: defaultVolumes(), t2: defaultVolumes() });
+      const [params, setParams] = useState({ adminTime: 10, shrinkage: 20 });
+      const [allocMode, setAllocMode] = useState("dedicated"); // "dedicated" | "flexible"
+      const [teams, setTeams] = useState([{ name: "Team A", pct: 50, color: "#e8590c" }, { name: "Team B", pct: 50, color: "#2f9e44" }]);
+      const [activeTab, setActiveTab] = useState("volume");
+      const [resultView, setResultView] = useState("calls");
+      const [selectedTeam, setSelectedTeam] = useState(null);
+      const [uploadError, setUploadError] = useState("");
+      const fileRef = useRef();
+      const [volAnalysisData, setVolAnalysisData] = useState({});   // { [taskTypeId]: parsedRows }
+      const [volTaskType, setVolTaskType] = useState("t1");            // which task type the Volume tab is showing
+      const [volAnalysisError, setVolAnalysisError] = useState("");
+      const volAnalysisFileRef = useRef();
+      const [shiftRules, setShiftRules] = useState({ minHours: "", maxHours: "" });
+      const [activeWindowFilter, setActiveWindowFilter] = useState(null);
+      const [currentResourcing, setCurrentResourcing] = useState((() => {
+        const v = {}; DAYS.forEach(d => { v[d] = {}; HOURS.forEach(h => { v[d][h] = ""; }); }); return v;
+      })());
+      const [resourcingUploadError, setResourcingUploadError] = useState("");
+      const resourcingFileRef = useRef();
+      const [teamWindows, setTeamWindows] = useState([
+        { id: 1, name: "Day Reception",            color: "#1971c2", days: [0,1,2,3,4], startHour: 9,  endHour: 17, teamIdx: null },
+        { id: 2, name: "Out of Hours (Mon–Thu)",  color: "#e8590c", days: [0,1,2,3],   startHour: 17, endHour: 25, teamIdx: null },
+        { id: 3, name: "Out of Hours (Fri)",        color: "#e8590c", days: [4],         startHour: 15, endHour: 23, teamIdx: null },
+        { id: 4, name: "Out of Hours (Sat & Sun)",  color: "#e8590c", days: [5,6],       startHour: 7,  endHour: 23, teamIdx: null },
+        { id: 5, name: "Overnight (Tue–Fri)",     color: "#9c36b5", days: [1,2,3,4],   startHour: 1,  endHour: 9,  teamIdx: null },
+        { id: 6, name: "Overnight (Fri–Sat night)",color: "#9c36b5", days: [4,5],      startHour: 23, endHour: 31, teamIdx: null },
+        { id: 7, name: "Overnight (Sun night)",     color: "#9c36b5", days: [6],         startHour: 23, endHour: 33, teamIdx: null },
+      ]);
+
+      const agentProdMinutes = 60 * (1 - params.shrinkage / 100) - params.adminTime;
+
+      function agentsRequired(mins) {
+        if (!mins || mins <= 0 || agentProdMinutes <= 0) return 0;
+        return mins / agentProdMinutes;
+      }
+      const vol = (tid, d, h) => parseFloat(volumes[tid]?.[d]?.[h]) || 0;
+      // Volume after bounce-backs are added for that day
+      const effVol = (tt, d, h) => {
+        const v = vol(tt.id, d, h);
+        if (!tt.rework) return v;
+        const p = (tt.reworkPct && tt.reworkPct[d]) || 0;
+        return v * (1 + p / 100);
+      };
+
+      function getResults() {
+        const byDay = {};
+        DAYS.forEach(d => {
+          byDay[d] = {};
+          HOURS.forEach(h => {
+            let totalTasks = 0, workMins = 0, dedicatedAgents = 0, flexMins = 0, queuedAgents = 0;
+            const perTask = {}, perTaskAgents = {};
+            const availFraction = agentProdMinutes / 60;
+            taskTypes.forEach(tt => {
+              const v = effVol(tt, d, h);          // includes bounce-backs
+              perTask[tt.id] = v;
+              totalTasks += v;
+              const aht = parseFloat(tt.aht) || 0;
+              const mins = v * aht;
+              workMins += mins;
+              let ta;
+              if (tt.queued) {
+                // Live queue: Erlang C, sized so ASA meets target
+                ta = queueAgents(v, aht, parseFloat(tt.asaTarget) || 60, availFraction);
+                queuedAgents += ta;
+              } else {
+                // Backlog work: straight workload division
+                ta = Math.ceil(agentsRequired(mins));
+                flexMins += mins;
+              }
+              perTaskAgents[tt.id] = ta;
+              dedicatedAgents += ta;
+            });
+            // Queued types are always sized on their own; allocMode only pools the rest
+            const a = allocMode === "dedicated"
+              ? dedicatedAgents
+              : queuedAgents + agentsRequired(flexMins);
+            byDay[d][h] = {
+              calls: totalTasks,
+              perTask,
+              perTaskAgents,
+              workMins,
+              agents: ceil2(a),
+              teamSplit: teams.map(t => ({
+                name: t.name,
+                calls: totalTasks * (t.pct / 100),
+                agents: ceil2(a * (t.pct / 100)),
+              })),
+            };
+          });
+          byDay[d]._dayTotal = HOURS.reduce((s, h) => s + byDay[d][h].calls, 0);
+          byDay[d]._peakAgents = Math.max(0, ...HOURS.map(h => byDay[d][h].agents));
+        });
+        return byDay;
+      }
+
+      const results = getResults();
+      const globalMaxCalls = resultView === "all"
+        ? Math.max(1, ...DAYS.flatMap(d => HOURS.map(h => results[d][h].calls)))
+        : Math.max(1, ...DAYS.flatMap(d => HOURS.map(h => vol(activeTaskType, d, h))));
+      const globalMaxAgents = selectedTeam === null
+        ? Math.max(1, ...DAYS.flatMap(d => HOURS.map(h => results[d][h].agents)))
+        : Math.max(1, ...DAYS.flatMap(d => HOURS.map(h => results[d][h].teamSplit[selectedTeam]?.agents || 0)));
+
+      function setTeamPct(idx, val) { setTeams(teams.map((t, i) => i === idx ? { ...t, pct: parseFloat(val) || 0 } : t)); }
+      function setTeamName(idx, val) { setTeams(teams.map((t, i) => i === idx ? { ...t, name: val } : t)); }
+      function setTeamColor(idx, val) { setTeams(teams.map((t, i) => i === idx ? { ...t, color: val } : t)); }
+      function addTeam() {
+        if (teams.length >= 5) return;
+        const even = Math.floor(100 / (teams.length + 1));
+        const defaultColors = ["#e8590c","#2f9e44","#1971c2","#9c36b5","#c92a2a"];
+        setTeams([...teams.map(t => ({ ...t, pct: even })), { name: `Team ${String.fromCharCode(65 + teams.length)}`, pct: 100 - even * teams.length, color: defaultColors[teams.length % defaultColors.length] }]);
+      }
+      function removeTeam(idx) {
+        if (teams.length <= 1) return;
+        const next = teams.filter((_, i) => i !== idx);
+        const total = next.reduce((s, t) => s + t.pct, 0);
+        if (total !== 100 && next.length > 0) next[0].pct += 100 - total;
+        setTeams(next);
+        if (selectedTeam !== null && selectedTeam >= next.length) setSelectedTeam(null);
+      }
+      const teamPctTotal = teams.reduce((s, t) => s + t.pct, 0);
+
+      const setVol = (day, hour, val) => setVolumes(prev => ({
+        ...prev,
+        [activeTaskType]: { ...prev[activeTaskType], [day]: { ...prev[activeTaskType][day], [hour]: val } }
+      }));
+      function addTaskType() {
+        if (taskTypes.length >= 4) return;
+        const palette = ["#e8590c","#1971c2","#2f9e44","#9c36b5"];
+        const id = "t" + Date.now();
+        setTaskTypes([...taskTypes, { id, name: "New task", aht: 5, color: palette[taskTypes.length % 4], queued: false, asaTarget: 60,
+          rework: false, reworkPct: { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 } }]);
+        setVolumes(prev => ({ ...prev, [id]: defaultVolumes() }));
+        setActiveTaskType(id);
+      }
+      function removeTaskType(id) {
+        if (taskTypes.length <= 1) return;
+        const next = taskTypes.filter(t => t.id !== id);
+        setTaskTypes(next);
+        setVolumes(prev => { const n = { ...prev }; delete n[id]; return n; });
+        if (activeTaskType === id) setActiveTaskType(next[0].id);
+      }
+      function setReworkPct(id, day, val) {
+        setTaskTypes(taskTypes.map(t => t.id === id
+          ? { ...t, reworkPct: { ...(t.reworkPct || {}), [day]: parseFloat(val) || 0 } } : t));
+      }
+      function setTaskField(id, field, val) {
+        setTaskTypes(taskTypes.map(t => t.id === id ? { ...t, [field]: val } : t));
+      }
+      const activeTask = taskTypes.find(t => t.id === activeTaskType) || taskTypes[0];
+
+      function handleFileUpload(e) {
+        setUploadError("");
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const text = ev.target.result;
+            const rows = text.trim().split(/\r?\n/).map(r => r.split(/,/).map(c => c.trim()));
+            const headerRow = rows[0].map(c => c.toLowerCase());
+            const newVols = defaultVolumes();
+            let parsed = 0;
+
+            // Detect format by checking if first data cell is an hour label (e.g. "8am")
+            const firstDataCell = rows[1]?.[0]?.toLowerCase();
+            const isHoursAsRows = HOURS.some(h => h === firstDataCell);
+
+            let skipped = 0, skippedVals = 0;
+            if (isHoursAsRows) {
+              // Format: header = [title, Mon, Tue, ...], rows = [8am, 64, 57, ...]
+              const dayHeaders = headerRow.slice(1).map(c => DAYS.find(d => d.toLowerCase() === c.slice(0,3)));
+              for (let r = 1; r < rows.length; r++) {
+                const hourKey = HOURS.find(h => h === rows[r][0]?.toLowerCase());
+                if (!hourKey) {
+                  const n = rows[r].slice(1).reduce((s,v) => s + ((v !== "" && !isNaN(v)) ? parseFloat(v) : 0), 0);
+                  if (n > 0) { skipped++; skippedVals += n; }
+                  continue;
+                }
+                for (let c = 1; c < rows[r].length; c++) {
+                  const dayKey = dayHeaders[c - 1];
+                  if (!dayKey) continue;
+                  const val = rows[r][c];
+                  if (val !== "" && !isNaN(val)) { newVols[dayKey][hourKey] = val; parsed++; }
+                }
+              }
+            } else {
+              // Format: header = [title, 12am, 1am ...], rows = [Mon, 7, 5, ...]
+              for (let r = 1; r < rows.length; r++) {
+                const dayKey = DAYS.find(d => d.toLowerCase() === rows[r][0]?.toLowerCase()?.slice(0,3));
+                if (!dayKey) continue;
+                for (let c = 1; c < rows[r].length; c++) {
+                  const hourKey = HOURS.find(h => h === headerRow[c]);
+                  if (!hourKey) continue;
+                  const val = rows[r][c];
+                  if (val !== "" && !isNaN(val)) { newVols[dayKey][hourKey] = val; parsed++; }
+                }
+              }
+            }
+
+            if (parsed === 0) { setUploadError("Could not parse file — check format."); return; }
+            setVolumes(prev => ({ ...prev, [activeTaskType]: newVols }));
+            setUploadError(skipped > 0
+              ? `⚠ ${skipped} row${skipped>1?"s":""} skipped — no valid hour label (${skippedVals} tasks not counted)`
+              : "");
+          } catch { setUploadError("Failed to read file."); }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      }
+
+      function downloadTemplate(kind) {
+        let lines = [];
+        if (kind === "volume") {
+          // Hours down the left, dates across the top (4 weeks starting next Monday)
+          const start = new Date();
+          start.setDate(start.getDate() + ((8 - start.getDay()) % 7 || 7));
+          const dates = Array.from({ length: 28 }, (_, i) => {
+            const d = new Date(start); d.setDate(start.getDate() + i); return fmtDateKey(d);
+          });
+          lines.push(["Tasks Per Hour Per Day", ...dates].join(","));
+          HOURS.forEach(h => lines.push([h, ...dates.map(() => "")].join(",")));
+        } else {
+          const title = kind === "resourcing" ? "Current Agents Per Hour" : "Task Volume Per Hour Per Day";
+          lines.push([title, ...DAYS].join(","));
+          HOURS.forEach(h => lines.push([h, ...DAYS.map(() => "")].join(",")));
+        }
+        const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `template-${kind}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function exportCSV() {
+        const teamLabel = selectedTeam !== null ? teams[selectedTeam].name : "All Teams";
+        const viewLabel = resultView === "agents" ? "Agents Required" : "Task Volume";
+        const lines = [];
+
+        // Metrics header
+        lines.push("HEADCOUNT PLANNER EXPORT");
+        lines.push(`View,${viewLabel}`);
+        lines.push(`Team Filter,${teamLabel}`);
+        lines.push(`Admin Time (mins/hr),${params.adminTime}`);
+        taskTypes.forEach(tt => lines.push(`${tt.name},${(agentProdMinutes/tt.aht).toFixed(1)} per hr per agent${tt.queued ? ` | live queue, max avg wait ${tt.asaTarget}s` : " | backlog work"}${tt.rework ? ` | rework ${DAYS.map(d=>d+" "+((tt.reworkPct&&tt.reworkPct[d])||0)+"%").join(" ")}` : ""}`));
+        lines.push(`Shrinkage (%),${params.shrinkage}`);
+        lines.push(`Agent allocation,${allocMode === "dedicated" ? "One task type per hour" : "Can switch within the hour"}`);
+        lines.push(`Productive Mins/Agent/Hr,${agentProdMinutes.toFixed(1)}`);
+        teams.forEach(t => lines.push(`Team Split - ${t.name},${t.pct}%`));
+        lines.push("");
+
+        // Table header
+        lines.push(["Hour", ...DAYS, "Total"].join(","));
+
+        // Data rows
+        HOURS.forEach(h => {
+          const rowVals = DAYS.map(d => cellValue(d, h) || 0);
+          const rowTotal = resultView === "agents"
+            ? Math.ceil(rowVals.reduce((a,b)=>a+b,0))
+            : rowVals.reduce((a,b)=>a+b,0);
+          const cells = DAYS.map(d => {
+            const v = cellValue(d, h);
+            return v > 0 ? (resultView === "agents" ? Math.ceil(v) : v) : 0;
+          });
+          lines.push([h, ...cells, rowTotal].join(","));
+        });
+
+        // Totals row
+        const totals = DAYS.map(d => {
+          const val = resultView === "agents"
+            ? HOURS.reduce((s,h) => s + (selectedTeam === null ? results[d][h].agents : (results[d][h].teamSplit[selectedTeam]?.agents || 0)), 0)
+            : results[d]._dayTotal;
+          return resultView === "agents" ? Math.ceil(val) : val;
+        });
+        const grandTotalCell = resultView === "agents"
+          ? Math.ceil(DAYS.reduce((s,d) => s + HOURS.reduce((hs,h) => hs + (selectedTeam === null ? results[d][h].agents : (results[d][h].teamSplit[selectedTeam]?.agents || 0)), 0), 0))
+          : grandTotal;
+        lines.push(["Total", ...totals, grandTotalCell].join(","));
+
+        const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `headcount-planner-${resultView}-${teamLabel.replace(/\s+/g,"-").toLowerCase()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function handleResourcingUpload(e) {
+        setResourcingUploadError("");
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const text = ev.target.result;
+            const rows = text.trim().split(/\r?\n/).map(r => r.split(/,/).map(c => c.trim()));
+            const headerRow = rows[0].map(c => c.toLowerCase());
+            const newVols = {};
+            DAYS.forEach(d => { newVols[d] = {}; HOURS.forEach(h => { newVols[d][h] = ""; }); });
+            let parsed = 0;
+            const firstDataCell = rows[1]?.[0]?.toLowerCase();
+            const isHoursAsRows = HOURS.some(h => h === firstDataCell);
+            let skipped = 0, skippedVals = 0;
+            if (isHoursAsRows) {
+              const dayHeaders = headerRow.slice(1).map(c => DAYS.find(d => d.toLowerCase() === c.slice(0,3)));
+              for (let r = 1; r < rows.length; r++) {
+                const hourKey = HOURS.find(h => h === rows[r][0]?.toLowerCase());
+                if (!hourKey) {
+                  const n = rows[r].slice(1).reduce((s,v) => s + ((v !== "" && !isNaN(v)) ? parseFloat(v) : 0), 0);
+                  if (n > 0) { skipped++; skippedVals += n; }
+                  continue;
+                }
+                for (let c = 1; c < rows[r].length; c++) {
+                  const dayKey = dayHeaders[c-1];
+                  if (!dayKey) continue;
+                  const val = rows[r][c];
+                  if (val !== "" && !isNaN(val)) { newVols[dayKey][hourKey] = val; parsed++; }
+                }
+              }
+            } else {
+              for (let r = 1; r < rows.length; r++) {
+                const dayKey = DAYS.find(d => d.toLowerCase() === rows[r][0]?.toLowerCase()?.slice(0,3));
+                if (!dayKey) continue;
+                for (let c = 1; c < rows[r].length; c++) {
+                  const hourKey = HOURS.find(h => h === headerRow[c]);
+                  if (!hourKey) continue;
+                  const val = rows[r][c];
+                  if (val !== "" && !isNaN(val)) { newVols[dayKey][hourKey] = val; parsed++; }
+                }
+              }
+            }
+            if (parsed === 0) { setResourcingUploadError("Could not parse file."); return; }
+            setCurrentResourcing(newVols);
+            setResourcingUploadError(skipped > 0
+              ? `⚠ ${skipped} row${skipped>1?"s":""} skipped — no valid hour label (${skippedVals} agent-hrs not counted)`
+              : "");
+          } catch { setResourcingUploadError("Failed to read file."); }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      }
+
+            function handleVolAnalysisUpload(e) {
+        setVolAnalysisError("");
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const text = ev.target.result;
+            const rows = text.trim().split(/\r?\n/).map(r => r.split(/,/).map(c => c.trim()));
+            if (rows.length < 2) { setVolAnalysisError("File too short."); return; }
+            const header = rows[0].map(x => x.toLowerCase());
+            const parsed = [];
+
+            // Format A (preferred): hours down the left, dates across the top
+            const col0IsHour = HOURS.includes(rows[1]?.[0]?.toLowerCase());
+            const headerHasDates = rows[0].slice(1).some(x => parseFlexDate(x));
+
+            let skipped = 0, skippedVals = 0;
+            if (col0IsHour && headerHasDates) {
+              const dateCols = rows[0].map((x, i) => (i === 0 ? null : parseFlexDate(x)));
+              for (let r = 1; r < rows.length; r++) {
+                const hi = HOURS.indexOf(rows[r][0]?.toLowerCase());
+                if (hi < 0) {
+                  const n = rows[r].slice(1).reduce((s,v) => s + ((v !== "" && !isNaN(v)) ? parseFloat(v) : 0), 0);
+                  if (n > 0) { skipped++; skippedVals += n; }
+                  continue;
+                }
+                for (let col = 1; col < rows[r].length; col++) {
+                  const d = dateCols[col];
+                  if (!d) continue;
+                  const raw = rows[r][col];
+                  if (raw === "" || raw === undefined || isNaN(raw)) continue;
+                  parsed.push({ date: fmtDateKey(d), dow: d.getDay(), hour: hi, count: parseFloat(raw) });
+                }
+              }
+            } else if (HOURS.some(h => header.includes(h))) {
+              // Format B: dates down the left, hours across the top
+              for (let r = 1; r < rows.length; r++) {
+                const d = parseFlexDate(rows[r][0]);
+                if (!d) continue;
+                HOURS.forEach((h, hi) => {
+                  const col = header.indexOf(h);
+                  if (col < 0) return;
+                  const raw = rows[r][col];
+                  if (raw === "" || raw === undefined || isNaN(raw)) return;
+                  parsed.push({ date: fmtDateKey(d), dow: d.getDay(), hour: hi, count: parseFloat(raw) });
+                });
+              }
+            } else {
+              // Format C: long form — Date, Hour, Count
+              const hourCol = header.findIndex(h => h === "hour");
+              const countCol = header.findIndex(h => ["count","calls","tasks","volume"].includes(h));
+              if (hourCol < 0 || countCol < 0) { setVolAnalysisError("Unrecognised format — use the template."); return; }
+              for (let r = 1; r < rows.length; r++) {
+                const d = parseFlexDate(rows[r][0]);
+                if (!d) continue;
+                const hi = HOURS.indexOf(rows[r][hourCol]?.toLowerCase());
+                if (hi < 0) continue;
+                const raw = rows[r][countCol];
+                if (raw === "" || isNaN(raw)) continue;
+                parsed.push({ date: fmtDateKey(d), dow: d.getDay(), hour: hi, count: parseFloat(raw) });
+              }
+            }
+
+            if (parsed.length === 0) { setVolAnalysisError("No data parsed — check the file matches the template."); return; }
+            setVolAnalysisData(prev => ({ ...prev, [volTaskType]: parsed }));
+            setVolAnalysisError(skipped > 0
+              ? `⚠ ${skipped} row${skipped>1?"s":""} skipped — no valid hour label (${skippedVals} tasks not counted)`
+              : "");
+          } catch (err) { setVolAnalysisError("Failed to read file: " + err.message); }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      }
+
+            const weekSummary = DAYS.map(d => ({ day: d, totalCalls: results[d]._dayTotal, peakAgents: results[d]._peakAgents }));
+      const grandTotal = weekSummary.reduce((s, d) => s + d.totalCalls, 0);
+
+      function cellValue(d, h) {
+        if (resultView === "all") return Math.round(results[d][h].calls) || null;
+        if (resultView === "calls") return vol(activeTaskType, d, h) || null;
+        if (selectedTeam === null) return results[d][h].agents || null;
+        return results[d][h].teamSplit[selectedTeam]?.agents || null;
+      }
+      function cellHeat(d, h) {
+        const v = cellValue(d, h);
+        if (!v) return "transparent";
+        return heatColor(v / (resultView === "calls" ? globalMaxCalls : globalMaxAgents));
+      }
+
+      const card = { background: "#fff", border: "1px solid #e5e2dd", borderRadius: 10 };
+
+      return (
+        <div style={{ fontFamily: "'Inter', sans-serif", background: "#f5f4f2", minHeight: "100vh", color: "#1a1a1a" }}>
+
+          {/* Header */}
+          <div style={{ background: "#fff", borderBottom: "1px solid #e5e2dd", padding: "14px 28px", display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 8, background: "linear-gradient(135deg,#e8590c,#fd8f51)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="17" height="17" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="10" width="3" height="6" rx="1" fill="white" opacity="0.75"/>
+                <rect x="7.5" y="6" width="3" height="10" rx="1" fill="white"/>
+                <rect x="13" y="2" width="3" height="14" rx="1" fill="white" opacity="0.6"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.02em" }}>Headcount Planner</div>
+              <div style={{ fontSize: 11, color: "#a09488", marginTop: 1 }}>Call Centre Resource Calculator</div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ background: "#fff", borderBottom: "1px solid #e5e2dd", padding: "0 28px", display: "flex", gap: 2 }}>
+            {[["volume","Volume Analysis"],["input","Headcount Planner"],["gap","Gap Analysis"],["shifts","Suggested Shift Patterns"]].map(([id, label]) => (
+              <button key={id} className={`tab ${activeTab === id ? "on" : ""}`} onClick={() => setActiveTab(id)}>{label}</button>
+            ))}
+          </div>
+
+          <div style={{ padding: "24px 28px", maxWidth: 1500, margin: "0 auto" }}>
+
+            {/* ═══ INPUT TAB ═══ */}
+            {activeTab === "input" && (
+              <React.Fragment>
+              <div style={{ display: "grid", gridTemplateColumns: "270px 1fr", gap: 22 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+                  {/* Params */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div className="lxs">Agent Parameters</div>
+                    {[
+                      { key: "adminTime", label: "Admin time / hr (mins)" },
+                      { key: "shrinkage", label: "Shrinkage (%)" },
+                    ].map(({ key, label }) => (
+                      <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                        <label style={{ fontSize: 12.5, color: "#5a524c" }}>{label}</label>
+                        <input type="number" min={0} step={0.5} className="pi"
+                          value={params[key]} onChange={e => setParams(p => ({ ...p, [key]: parseFloat(e.target.value) || 0 }))} />
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 4, marginBottom: 10, paddingTop: 10, borderTop: "1px solid #f0ede8" }}>
+                      <div style={{ fontSize: 11.5, color: "#5a524c", marginBottom: 6 }}>Agent allocation</div>
+                      {[["dedicated","One task type per hour","Agents are assigned to calls or tickets for the hour"],
+                        ["flexible","Can switch within the hour","Workload minutes pooled across task types"]].map(([v,lab,hint]) => (
+                        <div key={v} onClick={() => setAllocMode(v)}
+                          style={{ display:"flex", gap:7, alignItems:"flex-start", cursor:"pointer", marginBottom:6,
+                                   padding:"6px 8px", borderRadius:6,
+                                   background: allocMode===v ? "#fff8f5" : "transparent",
+                                   border: `1.5px solid ${allocMode===v ? "#fbd5be" : "transparent"}` }}>
+                          <div style={{ width:12, height:12, borderRadius:"50%", flexShrink:0, marginTop:2,
+                                        border:`1.5px solid ${allocMode===v ? "#e8590c" : "#c8c0b8"}`,
+                                        background: allocMode===v ? "#e8590c" : "#fff",
+                                        boxShadow: allocMode===v ? "inset 0 0 0 2px #fff" : "none" }} />
+                          <div>
+                            <div style={{ fontSize:11.5, fontWeight:600, color: allocMode===v ? "#1a1a1a" : "#5a524c" }}>{lab}</div>
+                            <div style={{ fontSize:10, color:"#a09488", lineHeight:1.4 }}>{hint}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: 10, background: "#fff8f5", border: "1px solid #fbd5be", borderRadius: 7, padding: "10px 12px" }}>
+                      <div style={{ fontSize: 10.5, color: "#a09488", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 3 }}>Productive mins / agent / hr</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: agentProdMinutes > 0 ? "#e8590c" : "#e03131" }}>
+                        {agentProdMinutes > 0 ? agentProdMinutes.toFixed(1) : "⚠ check params"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Task types */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+                      <div className="lxs" style={{ marginBottom:0 }}>Task Types</div>
+                      {taskTypes.length < 4 && <button className="atb" onClick={addTaskType}>+ Add</button>}
+                    </div>
+                    {taskTypes.map(tt => (
+                      <div key={tt.id} style={{ marginBottom:9, padding:"8px 9px", borderRadius:7,
+                        background: activeTaskType === tt.id ? "#fff8f5" : "#faf9f7",
+                        border: `1.5px solid ${activeTaskType === tt.id ? "#fbd5be" : "#f0ede8"}` }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
+                          <input type="color" className="cdot" value={tt.color} style={{ width:16, height:16, flexShrink:0 }}
+                            onChange={e => setTaskField(tt.id, "color", e.target.value)} />
+                          <input className="ti" style={{ flex:1, minWidth:0, fontWeight:600 }} value={tt.name}
+                            onChange={e => setTaskField(tt.id, "name", e.target.value)} />
+                          {taskTypes.length > 1 && <button className="rm" onClick={() => removeTaskType(tt.id)}>x</button>}
+                        </div>
+
+                        <div onClick={() => setTaskField(tt.id, "queued", !tt.queued)}
+                          style={{ display:"flex", alignItems:"center", gap:6, cursor:"pointer", marginTop:6, paddingTop:6, borderTop:"1px solid #f0ede8" }}>
+                          <div style={{ width:26, height:15, borderRadius:8, flexShrink:0, position:"relative",
+                                        background: tt.queued ? "#e8590c" : "#d4cfc8", transition:"background 0.15s" }}>
+                            <div style={{ position:"absolute", top:2, left: tt.queued ? 13 : 2, width:11, height:11,
+                                          borderRadius:"50%", background:"#fff", transition:"left 0.15s" }} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize:11, fontWeight:600, color: tt.queued ? "#1a1a1a" : "#8a8178" }}>
+                              {tt.queued ? "Live queue (Erlang)" : "Backlog work"}
+                            </div>
+                            <div style={{ fontSize:9.5, color:"#a09488" }}>
+                              {tt.queued ? "Caller waits — sized for answer time" : "Can be worked through at own pace"}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:6, marginTop:6 }}>
+                          <label style={{ fontSize:11.5, color:"#5a524c" }}>Tasks / hr / agent</label>
+                          <input type="number" min={0} step={0.5} className="ti" style={{ width:56, textAlign:"right" }}
+                            value={tt.aht > 0 && agentProdMinutes > 0 ? Math.round((agentProdMinutes / tt.aht) * 10) / 10 : ""}
+                            onChange={e => {
+                              const tph = parseFloat(e.target.value);
+                              if (tph > 0 && agentProdMinutes > 0) setTaskField(tt.id, "aht", Math.round((agentProdMinutes / tph) * 100) / 100);
+                            }} />
+                        </div>
+                        {tt.queued && (
+                          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:6, marginTop:6 }}>
+                            <label style={{ fontSize:11.5, color:"#5a524c" }}>Max avg wait (secs)</label>
+                            <input type="number" min={1} step={5} className="ti" style={{ width:56, textAlign:"right" }}
+                              value={tt.asaTarget ?? 60}
+                              onChange={e => setTaskField(tt.id, "asaTarget", parseFloat(e.target.value) || 0)} />
+                          </div>
+                        )}
+                        <div style={{ fontSize:9.5, color:"#c0b8b0", marginTop:4 }}>
+                          works out at {tt.aht > 0 ? tt.aht.toFixed(1) : "—"} min handling time per task
+                        </div>
+                        <div onClick={() => setTaskField(tt.id, "rework", !tt.rework)}
+                          style={{ display:"flex", alignItems:"center", gap:6, cursor:"pointer", marginTop:6, paddingTop:6, borderTop:"1px solid #f0ede8" }}>
+                          <div style={{ width:26, height:15, borderRadius:8, flexShrink:0, position:"relative",
+                                        background: tt.rework ? "#e8590c" : "#d4cfc8", transition:"background 0.15s" }}>
+                            <div style={{ position:"absolute", top:2, left: tt.rework ? 13 : 2, width:11, height:11,
+                                          borderRadius:"50%", background:"#fff", transition:"left 0.15s" }} />
+                          </div>
+                          <div style={{ fontSize:11, fontWeight:600, color: tt.rework ? "#1a1a1a" : "#8a8178" }}>
+                            Rework / bounce-back
+                          </div>
+                        </div>
+                        {tt.rework && (
+                          <div style={{ marginTop:6 }}>
+                            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gap:2 }}>
+                              {DAYS.map(d => (
+                                <div key={d} style={{ textAlign:"center" }}>
+                                  <div style={{ fontSize:8.5, color:"#a09488", fontWeight:600, marginBottom:2 }}>{d[0]}{d[1]}</div>
+                                  <input type="number" min={0} max={200} step={5}
+                                    value={(tt.reworkPct && tt.reworkPct[d]) ?? 0}
+                                    onChange={e => setReworkPct(tt.id, d, e.target.value)}
+                                    style={{ width:"100%", minWidth:0, fontSize:10, padding:"3px 1px", textAlign:"center",
+                                             border:"1px solid #ddd9d3", borderRadius:4, fontFamily:"inherit", color:"#1a1a1a" }} />
+                                </div>
+                              ))}
+                            </div>
+                            <div style={{ fontSize:9, color:"#c0b8b0", marginTop:3 }}>
+                              % added back per day — {DAYS.reduce((s,d)=>s+HOURS.reduce((hs,h)=>hs+vol(tt.id,d,h),0),0).toLocaleString()} becomes {Math.round(DAYS.reduce((s,d)=>s+HOURS.reduce((hs,h)=>hs+effVol(tt,d,h),0),0)).toLocaleString()}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <div style={{ fontSize:10.5, color:"#a09488", lineHeight:1.6, marginTop:2 }}>
+                      AHT and tasks/hr are two views of the same thing — edit either and the other follows, based on {agentProdMinutes > 0 ? agentProdMinutes.toFixed(1) : "—"} productive mins/hr.
+                      <div style={{ marginTop:5 }}>Set allocation above: dedicated (one task type per hour) or flexible (pooled).</div>
+                    </div>
+                  </div>
+
+                  {/* Teams */}
+                  <div style={{ ...card, padding: 18 }}>
+                    <div className="lxs">Volume Split by Team</div>
+                    {teams.map((team, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9 }}>
+                        <input type="color" className="cdot" value={team.color || TEAM_COLORS[i % TEAM_COLORS.length]} style={{ width: 18, height: 18, flexShrink: 0 }}
+                          onChange={e => setTeamColor(i, e.target.value)} />
+                        <input className="ti" style={{ flex: 1, minWidth: 0 }} value={team.name} onChange={e => setTeamName(i, e.target.value)} />
+                        <input type="number" min={0} max={100} className="ti" style={{ width: 48, textAlign: "right" }}
+                          value={team.pct} onChange={e => setTeamPct(i, e.target.value)} />
+                        <span style={{ fontSize: 12, color: "#a09488" }}>%</span>
+                        <button className="rm" onClick={() => removeTeam(i)}>×</button>
+                      </div>
+                    ))}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
+                      <span style={{ fontSize: 11, color: teamPctTotal !== 100 ? "#e03131" : "#9a918a" }}>
+                        {teamPctTotal !== 100 ? `⚠ Total: ${teamPctTotal}% (must be 100)` : "✓ 100%"}
+                      </span>
+                      {teams.length < 5 && <button className="atb" onClick={addTeam}>+ Add team</button>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Volume entry grid — full weekly heat-map with editable inputs */}
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12 }}>
+                    <div>
+                      <div className="lxs" style={{ marginBottom: 3 }}>{resultView === "calls" ? `${activeTask.name} — enter volume per hour for each day` : resultView === "all" ? "All Tasks — combined volume across every task type" : "Agents Required — pooled across every task type"}</div>
+                      <div style={{ fontSize: 11.5, color: "#a09488" }}>{resultView === "calls" ? `Type into any cell, or upload a CSV for this task type.` : (allocMode === "dedicated" ? `${taskTypes.map(t => t.name).join(" + ")} — each sized separately, since an agent works one task type per hour.` : `Pooled from ${taskTypes.map(t => t.name).join(" + ")} — workload combined, then divided once.`)}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      {uploadError && <span style={{ fontSize: 11, color: "#e03131" }}>{uploadError}</span>}
+                      <button className="upb" style={{ borderStyle: "dashed" }} onClick={() => downloadTemplate("volumes")}>⬇ Template</button>
+                      <button className="upb" onClick={() => fileRef.current.click()}>⬆ Upload CSV</button>
+                      <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{ display: "none" }} onChange={handleFileUpload} />
+                      <button className="upb" style={{ background: "#fff8f5", borderColor: "#fbd5be", color: "#e8590c" }} onClick={exportCSV}>⬇ Export CSV</button>
+                    </div>
+                  </div>
+
+                  {/* Show/Team toggles — identical to Weekly Grid tab */}
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 12, color: "#8a8178", fontWeight: 500 }}>Show:</span>
+                    {taskTypes.map(tt => (
+                      <button key={tt.id}
+                        className={`tgb ${resultView === "calls" && activeTaskType === tt.id ? "on" : ""}`}
+                        style={resultView === "calls" && activeTaskType === tt.id ? { background: tt.color, borderColor: tt.color } : {}}
+                        onClick={() => { setResultView("calls"); setActiveTaskType(tt.id); }}>
+                        <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
+                          <span style={{ width:8, height:8, borderRadius:"50%", background: tt.color, display:"inline-block", flexShrink:0 }} />
+                          {tt.name}
+                        </span>
+                      </button>
+                    ))}
+                    <button className={`tgb ${resultView === "all" ? "on" : ""}`} onClick={() => setResultView("all")}>All tasks</button>
+                    <button className={`tgb ${resultView === "agents" ? "on" : ""}`} onClick={() => setResultView("agents")}>Agents required</button>
+                    <div style={{ width: 1, height: 22, background: "#e5e2dd", margin: "0 4px" }} />
+                    <span style={{ fontSize: 12, color: "#8a8178", fontWeight: 500 }}>Team:</span>
+                    <button className={`tgb ${selectedTeam === null ? "on" : ""}`} onClick={() => setSelectedTeam(null)}>All</button>
+                    {teams.map((t, i) => (
+                      <button key={i} className={`tgb ${selectedTeam === i ? "on" : ""}`}
+                        style={selectedTeam === i ? { background: t.color || TEAM_COLORS[i % TEAM_COLORS.length], borderColor: t.color || TEAM_COLORS[i % TEAM_COLORS.length] } : {}}
+                        onClick={() => setSelectedTeam(selectedTeam === i ? null : i)}>{t.name}</button>
+                    ))}
+                  </div>
+
+                  {/* Stat chips */}
+                  <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+                    {[["Prod. mins/hr",`${agentProdMinutes.toFixed(1)} min`],
+                      ...taskTypes.map(tt => [tt.name, `${DAYS.reduce((s,d)=>s+HOURS.reduce((hs,h)=>hs+vol(tt.id,d,h),0),0).toLocaleString()}` +
+                        (tt.rework ? ` +rework ${Math.round(DAYS.reduce((s,d)=>s+HOURS.reduce((hs,h)=>hs+effVol(tt,d,h),0),0)).toLocaleString()}` : "") +
+                        (allocMode === "dedicated" ? ` → ${DAYS.reduce((s,d)=>s+HOURS.reduce((hs,h)=>hs+(results[d][h].perTaskAgents?.[tt.id]||0),0),0)} agent-hrs` : "")]),
+                      ["Shrinkage",`${params.shrinkage}%`],["Admin",`${params.adminTime} min`],
+                      ["Week tasks",Math.round(grandTotal).toLocaleString()],
+                      ["Week workload",`${Math.round(DAYS.reduce((s,d)=>s+HOURS.reduce((hs,h)=>hs+results[d][h].workMins,0),0)/60).toLocaleString()} hrs`]].map(([l,v]) => (
+                      <div key={l} className="chip"><span style={{ color: "#a09488" }}>{l}: </span><span style={{ color: "#e8590c", fontWeight: 700 }}>{v}</span></div>
+                    ))}
+                  </div>
+
+                  {/* Heat-map grid with editable volume inputs */}
+                  <div style={{ ...card, overflow: "hidden" }}>
+                    <div style={{ overflowX: "auto" }}>
+                      <table className="wt">
+                        <thead>
+                          <tr>
+                            <th className="hc">Hour</th>
+                            {DAYS.map(d => <th key={d} style={{ minWidth: 100 }}>{d}</th>)}
+                            <th style={{ minWidth: 70, color: "#e8590c" }}>Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {HOURS.map(h => {
+                            const rowVals = DAYS.map(d => cellValue(d, h) || 0);
+                            const rowMax = Math.max(0, ...rowVals);
+                            return (
+                              <tr key={h}>
+                                <td className="hl">{h}</td>
+                                {DAYS.map(d => {
+                                  const val = cellValue(d, h);
+                                  const bg = cellHeat(d, h);
+                                  return (
+                                    <td key={d} style={{ background: bg, padding: "2px 4px" }}>
+                                      {resultView === "calls"
+                                        ? <input type="number" min={0} className="vi" style={{ width: "100%", background: "transparent", border: "1px solid rgba(0,0,0,0.08)" }}
+                                            value={volumes[activeTaskType]?.[d]?.[h] ?? ""} onChange={e => setVol(d, h, e.target.value)} placeholder="—" />
+                                        : val > 0
+                                          ? <div className="ci">{ceilInt(val)}</div>
+                                          : <div className="ce">—</div>
+                                      }
+                                    </td>
+                                  );
+                                })}
+                                <td style={{ background: rowMax > 0 ? "rgba(232,89,12,0.07)" : "transparent" }}>
+                                  {rowMax > 0 ? <div className="ci" style={{ color: "#e8590c" }}>{resultView === "agents" ? Math.ceil(rowVals.reduce((a,b)=>a+b,0)) : rowVals.reduce((a,b)=>a+b,0)}</div> : <div className="ce">—</div>}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          <tr className="tr-tot">
+                            <td className="hl" style={{ fontWeight: 700, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "#5a524c" }}>
+                              Total
+                            </td>
+                            {DAYS.map(d => {
+                              const val = resultView === "agents"
+                                ? HOURS.reduce((s,h) => s + (selectedTeam === null ? results[d][h].agents : (results[d][h].teamSplit[selectedTeam]?.agents || 0)), 0)
+                                : results[d]._dayTotal;
+                              return (
+                                <td key={d} style={{ padding: "8px", color: val > 0 ? "#e8590c" : "#c8c0b8" }}>
+                                  {val > 0 ? (resultView === "agents" ? Math.ceil(val) : val.toLocaleString()) : "—"}
+                                </td>
+                              );
+                            })}
+                            <td style={{ padding: "8px", color: "#e8590c" }}>
+                              {resultView === "agents"
+                                ? Math.ceil(DAYS.reduce((s,d) => s + HOURS.reduce((hs,h) => hs + (selectedTeam === null ? results[d][h].agents : (results[d][h].teamSplit[selectedTeam]?.agents || 0)), 0), 0))
+                                : grandTotal.toLocaleString()}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 7, fontSize: 11, color: "#a09488" }}>
+                    <span>Heat intensity:</span>
+                    {[0.1,0.25,0.42,0.6].map((a,i) => <div key={i} style={{ width: 16, height: 16, borderRadius: 3, background: `rgba(232,89,12,${a})`, border: "1px solid #e5e2dd" }} />)}
+                    <span>low → high &nbsp;|&nbsp; Pick a task type above to edit its volumes</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Calculation method — aligned under table */}
+              <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "270px 1fr", gap: 22 }}>
+                <div />
+                <div style={{ background: "#fff8f5", border: "1px solid #fbd5be", borderRadius: 8, padding: "12px 16px", fontSize: 12, color: "#8a8178", lineHeight: 2 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#a09488", marginBottom: 4 }}>Calculation Method</div>
+                  <div><b style={{ color: "#5a524c" }}>Productive mins/agent/hr</b> = 60 × (1 − shrinkage%) − admin time</div>
+                  <div><b style={{ color: "#5a524c" }}>Live queue</b> = Erlang C — fewest agents where average wait ≤ the task\u2019s target, ÷ availability</div>
+                  <div><b style={{ color: "#5a524c" }}>Backlog work</b> = (Tasks × AHT) ÷ Productive mins/agent/hr</div>
+                  <div><b style={{ color: "#5a524c" }}>Rework</b> = task volume × (1 + that day\u2019s bounce-back %), applied before sizing</div>
+                  <div><b style={{ color: "#5a524c" }}>Team agents</b> = Agents required × team split %</div>
+                </div>
+              </div>
+              </React.Fragment>
+            )}
+
+            {/* ═══ VOLUME ANALYSIS TAB ═══ */}
+            {activeTab === "volume" && (() => {
+              // ── Compute averages from parsed data ──
+              const DOW_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+              let avgByDowHour = null;   // avg[dow][hour]
+              let weeklyStats = null;
+              let dateRange = null;
+
+              const activeVolTask = taskTypes.find(t => t.id === volTaskType) || taskTypes[0];
+              const rowsForTask = volAnalysisData[volTaskType] || null;
+              const loadedTaskIds = taskTypes.filter(t => (volAnalysisData[t.id] || []).length > 0).map(t => t.id);
+
+              // Reusable: build the avg grid for any task type's rows
+              function buildAvg(rows) {
+                if (!rows || rows.length === 0) return null;
+                const sums = {}, uniq = {};
+                rows.forEach(({ date, dow, hour, count }) => {
+                  sums[`${dow}_${hour}`] = (sums[`${dow}_${hour}`] || 0) + count;
+                  (uniq[dow] = uniq[dow] || new Set()).add(date);
+                });
+                const dowToDay = [6,0,1,2,3,4,5];
+                const g = {};
+                DAYS.forEach(d => { g[d] = {}; HOURS.forEach(h => { g[d][h] = 0; }); });
+                for (let dow = 0; dow < 7; dow++) {
+                  const n = uniq[dow] ? uniq[dow].size : 0;
+                  if (!n) continue;
+                  HOURS.forEach((h, hi) => { g[DAYS[dowToDay[dow]]][h] = Math.round((sums[`${dow}_${hi}`] || 0) / n); });
+                }
+                return g;
+              }
+
+              if (rowsForTask && rowsForTask.length > 0) {
+                const volAnalysisData = rowsForTask;   // shadow for the existing block below
+                // Group by dow+hour: sum and count unique dates
+                const sums = {}; const dateCounts = {};
+                const uniqueDates = {};
+                volAnalysisData.forEach(({ date, dow, hour, count }) => {
+                  const k = `${dow}_${hour}`;
+                  sums[k] = (sums[k] || 0) + count;
+                  if (!uniqueDates[dow]) uniqueDates[dow] = new Set();
+                  uniqueDates[dow].add(date);
+                });
+
+                // Build avg grid keyed by our DAYS array (Mon=0..Sun=6 → dow Mon=1..Sun=0)
+                // DOW: 0=Sun,1=Mon,...,6=Sat → map to DAYS index Mon=0..Sun=6
+                const dowToDay = [6,0,1,2,3,4,5]; // dow→DAYS idx
+                avgByDowHour = {};
+                DAYS.forEach(d => { avgByDowHour[d] = {}; HOURS.forEach(h => { avgByDowHour[d][h] = 0; }); });
+
+                for (let dow = 0; dow < 7; dow++) {
+                  const nDates = uniqueDates[dow] ? uniqueDates[dow].size : 0;
+                  if (nDates === 0) continue;
+                  const dayKey = DAYS[dowToDay[dow]];
+                  HOURS.forEach((h, hi) => {
+                    const k = `${dow}_${hi}`;
+                    avgByDowHour[dayKey][h] = nDates > 0 ? Math.round((sums[k] || 0) / nDates) : 0;
+                  });
+                }
+
+                // Weekly stats: avg tasks per day-of-week, avg per week
+                const dayTotals = {};
+                DAYS.forEach(d => { dayTotals[d] = HOURS.reduce((s,h) => s + (avgByDowHour[d][h]||0), 0); });
+                const weekTotal = Object.values(dayTotals).reduce((a,b)=>a+b,0);
+
+                // Date range
+                const allDates = [...new Set(volAnalysisData.map(r=>r.date))].sort((a,b) => parseFlexDate(a) - parseFlexDate(b));
+                const nWeeks = allDates.length > 0
+                  ? Math.max(1, Math.round((new Date(allDates[allDates.length-1]) - new Date(allDates[0])) / (7*864e5)))
+                  : 1;
+
+                weeklyStats = { dayTotals, weekTotal, nWeeks, nDates: allDates.length };
+                dateRange = { from: allDates[0], to: allDates[allDates.length-1], nDates: allDates.length };
+              }
+
+              // Heat max for colouring
+              const maxVal = avgByDowHour
+                ? Math.max(1, ...DAYS.flatMap(d => HOURS.map(h => avgByDowHour[d][h]||0)))
+                : 1;
+
+              function exportVolumeCSV() {
+                const lines = [];
+                lines.push("VOLUME ANALYSIS EXPORT");
+                lines.push(`Task type,${activeVolTask.name}`);
+                if (dateRange) {
+                  lines.push(`Date range,${dateRange.from} to ${dateRange.to}`);
+                  lines.push(`Days of data,${dateRange.nDates}`);
+                }
+                lines.push(`Avg tasks per week,${weeklyStats.weekTotal}`);
+                lines.push("");
+
+                lines.push("AVERAGE TASKS PER HOUR PER DAY");
+                lines.push(["Hour", ...DAYS, "Total"].join(","));
+                HOURS.forEach(h => {
+                  const vals = DAYS.map(d => avgByDowHour[d][h] || 0);
+                  lines.push([h, ...vals, vals.reduce((a,b)=>a+b,0)].join(","));
+                });
+                lines.push(["Total", ...DAYS.map(d => weeklyStats.dayTotals[d] || 0), weeklyStats.weekTotal].join(","));
+                lines.push("");
+
+                lines.push("VOLUME DISTRIBUTION (% OF EACH DAY)");
+                lines.push(["Hour", ...DAYS, "% of Week"].join(","));
+                HOURS.forEach(h => {
+                  const rowTotal = DAYS.reduce((s,d) => s + (avgByDowHour[d][h]||0), 0);
+                  const cells = DAYS.map(d => {
+                    const dt = weeklyStats.dayTotals[d] || 0;
+                    return dt > 0 ? (((avgByDowHour[d][h]||0) / dt) * 100).toFixed(1) + "%" : "0%";
+                  });
+                  const wk = weeklyStats.weekTotal > 0 ? ((rowTotal / weeklyStats.weekTotal) * 100).toFixed(1) + "%" : "0%";
+                  lines.push([h, ...cells, wk].join(","));
+                });
+                lines.push(["% of Week", ...DAYS.map(d => {
+                  const dt = weeklyStats.dayTotals[d] || 0;
+                  return weeklyStats.weekTotal > 0 ? ((dt / weeklyStats.weekTotal) * 100).toFixed(1) + "%" : "0%";
+                }), "100%"].join(","));
+
+                const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `volume-analysis-${activeVolTask.name.replace(/\s+/g,"-").toLowerCase()}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }
+
+              function pushToPlanner() {
+                const patch = {};
+                loadedTaskIds.forEach(tid => {
+                  const g = buildAvg(volAnalysisData[tid]);
+                  if (!g) return;
+                  const next = {};
+                  DAYS.forEach(d => {
+                    next[d] = {};
+                    HOURS.forEach(h => { const v = g[d][h] || 0; next[d][h] = v > 0 ? String(v) : ""; });
+                  });
+                  patch[tid] = next;
+                });
+                if (Object.keys(patch).length === 0) return;
+                setVolumes(prev => ({ ...prev, ...patch }));
+                setActiveTab("input");
+              }
+
+              return (
+                <div>
+                  {/* Header */}
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16, flexWrap:"wrap", gap:12 }}>
+                    <div>
+                      <div className="lxs" style={{ marginBottom:4 }}>Volume Analysis</div>
+                      <div style={{ fontSize:11.5, color:"#a09488" }}>
+                        Upload task volume by date and hour. We'll calculate averages by hour and day of week.
+                      </div>
+                    </div>
+                    <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+                      {volAnalysisError && <span style={{ fontSize:11, color:"#e03131" }}>{volAnalysisError}</span>}
+                      <button className="upb" style={{ borderStyle: "dashed" }} onClick={() => downloadTemplate("volume")}>⬇ Template</button>
+                      <button className="upb" onClick={() => volAnalysisFileRef.current.click()}>⬆ Upload CSV</button>
+                      <input ref={volAnalysisFileRef} type="file" accept=".csv,.tsv,.txt" style={{ display:"none" }} onChange={handleVolAnalysisUpload} />
+                      {rowsForTask && (
+                        <React.Fragment>
+                          <button className="upb" style={{ background:"#fff8f5", borderColor:"#fbd5be", color:"#e8590c" }}
+                            onClick={exportVolumeCSV}>⬇ Export CSV</button>
+                          <button className="upb" style={{ background:"#e8590c", borderColor:"#e8590c", color:"#fff", fontWeight:600 }}
+                            onClick={pushToPlanner}>→ Send {loadedTaskIds.length > 1 ? `all ${loadedTaskIds.length} task types` : "to Headcount Planner"}</button>
+                          <button className="upb" style={{ color:"#c92a2a", borderColor:"#f5c6c6" }}
+                            onClick={() => setVolAnalysisData(prev => { const n = { ...prev }; delete n[volTaskType]; return n; })}>Clear</button>
+                        </React.Fragment>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Task type selector */}
+                  <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:16, flexWrap:"wrap" }}>
+                    <span style={{ fontSize:12, color:"#8a8178", fontWeight:500 }}>Task type:</span>
+                    {taskTypes.map(tt => {
+                      const loaded = (volAnalysisData[tt.id] || []).length > 0;
+                      return (
+                        <button key={tt.id}
+                          className={`tgb ${volTaskType === tt.id ? "on" : ""}`}
+                          style={volTaskType === tt.id ? { background: tt.color, borderColor: tt.color } : {}}
+                          onClick={() => setVolTaskType(tt.id)}>
+                          <span style={{ display:"inline-flex", alignItems:"center", gap:5 }}>
+                            <span style={{ width:8, height:8, borderRadius:"50%", background: tt.color, display:"inline-block", flexShrink:0 }} />
+                            {tt.name}
+                            {loaded && <span style={{ fontSize:10, opacity:0.85 }}>✓</span>}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    {loadedTaskIds.length > 0 && (
+                      <span style={{ fontSize:11, color:"#a09488", marginLeft:4 }}>
+                        {loadedTaskIds.length} of {taskTypes.length} loaded
+                      </span>
+                    )}
+                  </div>
+
+                  {!rowsForTask ? (
+                    <div style={{ ...card, padding:40, textAlign:"center" }}>
+                      <div style={{ fontSize:15, fontWeight:600, color:"#5a524c", marginBottom:8 }}>No {activeVolTask.name} data uploaded yet</div>
+                      <div style={{ fontSize:13, color:"#a09488", marginBottom:6 }}>Upload a CSV with <b>hours down the left</b> (12am … 11pm) and <b>one column per date</b> across the top.</div>
+                      <div style={{ fontSize:12, color:"#c0b8b0", marginBottom:20 }}>Dates can be DD/MM/YYYY or YYYY-MM-DD. Works with any range — week, month, quarter, year.</div>
+                      <button className="upb" style={{ borderStyle: "dashed" }} onClick={() => downloadTemplate("volume")}>⬇ Template</button>
+                      <button className="upb" onClick={() => volAnalysisFileRef.current.click()}>⬆ Upload CSV</button>
+                    </div>
+                  ) : (
+                    <div>
+                      {/* Summary chips */}
+                      <div style={{ display:"flex", gap:10, marginBottom:16, flexWrap:"wrap" }}>
+                        {dateRange && [
+                          ["Date range", `${dateRange.from} → ${dateRange.to}`],
+                          ["Days of data", dateRange.nDates],
+                          ["Avg tasks / week", weeklyStats?.weekTotal?.toLocaleString()],
+                        ].map(([l,v]) => (
+                          <div key={l} className="chip">
+                            <span style={{ color:"#a09488" }}>{l}: </span>
+                            <span style={{ color:"#e8590c", fontWeight:700 }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Average by hour × day grid */}
+                      <div style={{ ...card, overflow:"hidden", marginBottom:16 }}>
+                        <div style={{ overflowX:"auto" }}>
+                          <table style={{ borderCollapse:"collapse", width:"100%", fontSize:12 }}>
+                            <thead>
+                              <tr style={{ background:"#f5f3f0" }}>
+                                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:10.5, fontWeight:700, color:"#a09488", letterSpacing:"0.06em", textTransform:"uppercase", borderBottom:"1.5px solid #e5e2dd", position:"sticky", left:0, background:"#f5f3f0", zIndex:3, whiteSpace:"nowrap" }}>Hour</th>
+                                {DAYS.map(d => (
+                                  <th key={d} style={{ padding:"8px 12px", textAlign:"center", fontSize:10.5, fontWeight:700, color:"#5a524c", letterSpacing:"0.05em", textTransform:"uppercase", borderBottom:"1.5px solid #e5e2dd", borderLeft:"1px solid #ece8e2", minWidth:80 }}>{d}</th>
+                                ))}
+                                <th style={{ padding:"8px 12px", textAlign:"center", fontSize:10.5, fontWeight:700, color:"#e8590c", letterSpacing:"0.05em", textTransform:"uppercase", borderBottom:"1.5px solid #e5e2dd", borderLeft:"1px solid #e5e2dd", minWidth:70 }}>Avg Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {HOURS.map((h, hi) => {
+                                const rowVals = DAYS.map(d => avgByDowHour[d][h]||0);
+                                const rowTotal = rowVals.reduce((a,b)=>a+b,0);
+                                if (rowTotal === 0) return null;
+                                return (
+                                  <tr key={h} style={{ background: hi%2===0?"#fff":"#fdfcfb" }}>
+                                    <td style={{ padding:"5px 14px", fontWeight:600, fontSize:12, color:"#5a524c", position:"sticky", left:0, background:hi%2===0?"#fff":"#fdfcfb", zIndex:1, borderRight:"1px solid #ece8e2" }}>{h}</td>
+                                    {DAYS.map(d => {
+                                      const v = avgByDowHour[d][h]||0;
+                                      const alpha = v > 0 ? 0.1 + (v/maxVal)*0.5 : 0;
+                                      return (
+                                        <td key={d} style={{ padding:"5px 10px", textAlign:"center", borderLeft:"1px solid #ece8e2", background: v>0 ? `rgba(232,89,12,${alpha.toFixed(2)})` : "transparent", fontWeight: v>0?600:400, color: v>0?"#1a1a1a":"#d0cbc4" }}>
+                                          {v > 0 ? v : "—"}
+                                        </td>
+                                      );
+                                    })}
+                                    <td style={{ padding:"5px 10px", textAlign:"center", borderLeft:"1px solid #e5e2dd", fontWeight:700, color:"#e8590c" }}>{rowTotal > 0 ? rowTotal : "—"}</td>
+                                  </tr>
+                                );
+                              })}
+                              {/* Day totals row */}
+                              <tr style={{ background:"#f5f3f0", borderTop:"1.5px solid #e5e2dd" }}>
+                                <td style={{ padding:"7px 14px", fontWeight:700, fontSize:10.5, color:"#5a524c", textTransform:"uppercase", letterSpacing:"0.04em", position:"sticky", left:0, background:"#ece8e2", zIndex:1 }}>Avg / Day</td>
+                                {DAYS.map(d => (
+                                  <td key={d} style={{ padding:"7px 10px", textAlign:"center", fontWeight:700, color:"#e8590c", borderLeft:"1px solid #e5e2dd" }}>
+                                    {weeklyStats?.dayTotals[d]?.toLocaleString() || "—"}
+                                  </td>
+                                ))}
+                                <td style={{ padding:"7px 10px", textAlign:"center", fontWeight:700, color:"#e8590c", borderLeft:"1px solid #e5e2dd" }}>
+                                  {weeklyStats?.weekTotal?.toLocaleString()}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* % distribution table */}
+                      <div style={{ ...card, overflow:"hidden", marginBottom:16 }}>
+                        <div style={{ padding:"12px 16px 10px", borderBottom:"1px solid #e5e2dd", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:8 }}>
+                          <div>
+                            <div className="lxs" style={{ marginBottom:2 }}>Volume Distribution (%)</div>
+                            <div style={{ fontSize:11, color:"#a09488" }}>
+                              Each cell = that hour's share of the day's total. Bottom row = each day's share of the week.
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ overflowX:"auto" }}>
+                          <table style={{ borderCollapse:"collapse", width:"100%", fontSize:12 }}>
+                            <thead>
+                              <tr style={{ background:"#f5f3f0" }}>
+                                <th style={{ padding:"8px 14px", textAlign:"left", fontSize:10.5, fontWeight:700, color:"#a09488", letterSpacing:"0.06em", textTransform:"uppercase", borderBottom:"1.5px solid #e5e2dd", position:"sticky", left:0, background:"#f5f3f0", zIndex:3, whiteSpace:"nowrap" }}>Hour</th>
+                                {DAYS.map(d => (
+                                  <th key={d} style={{ padding:"8px 12px", textAlign:"center", fontSize:10.5, fontWeight:700, color:"#5a524c", letterSpacing:"0.05em", textTransform:"uppercase", borderBottom:"1.5px solid #e5e2dd", borderLeft:"1px solid #ece8e2", minWidth:80 }}>{d}</th>
+                                ))}
+                                <th style={{ padding:"8px 12px", textAlign:"center", fontSize:10.5, fontWeight:700, color:"#e8590c", letterSpacing:"0.05em", textTransform:"uppercase", borderBottom:"1.5px solid #e5e2dd", borderLeft:"1px solid #e5e2dd", minWidth:80 }}>% of Week</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {HOURS.map((h, hi) => {
+                                const rowVals = DAYS.map(d => avgByDowHour[d][h] || 0);
+                                const rowTotal = rowVals.reduce((a,b)=>a+b,0);
+                                if (rowTotal === 0) return null;
+                                const weekPct = weeklyStats.weekTotal > 0 ? (rowTotal / weeklyStats.weekTotal) * 100 : 0;
+                                return (
+                                  <tr key={h} style={{ background: hi%2===0?"#fff":"#fdfcfb" }}>
+                                    <td style={{ padding:"5px 14px", fontWeight:600, fontSize:12, color:"#5a524c", position:"sticky", left:0, background:hi%2===0?"#fff":"#fdfcfb", zIndex:1, borderRight:"1px solid #ece8e2" }}>{h}</td>
+                                    {DAYS.map(d => {
+                                      const dayTot = weeklyStats.dayTotals[d] || 0;
+                                      const v = avgByDowHour[d][h] || 0;
+                                      const pct = dayTot > 0 ? (v / dayTot) * 100 : 0;
+                                      const alpha = pct > 0 ? 0.08 + Math.min(1, pct / 15) * 0.45 : 0;
+                                      return (
+                                        <td key={d} style={{ padding:"5px 10px", textAlign:"center", borderLeft:"1px solid #ece8e2", background: pct>0 ? `rgba(232,89,12,${alpha.toFixed(2)})` : "transparent", fontWeight: pct>0?600:400, color: pct>0?"#1a1a1a":"#d0cbc4" }}>
+                                          {pct > 0 ? pct.toFixed(1) + "%" : "—"}
+                                        </td>
+                                      );
+                                    })}
+                                    <td style={{ padding:"5px 10px", textAlign:"center", borderLeft:"1px solid #e5e2dd", fontWeight:700, color:"#e8590c" }}>
+                                      {weekPct > 0 ? weekPct.toFixed(1) + "%" : "—"}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                              {/* Column check: each day sums to 100% */}
+                              <tr style={{ background:"#faf9f7", borderTop:"1px solid #e5e2dd" }}>
+                                <td style={{ padding:"5px 14px", fontSize:10.5, color:"#a09488", fontWeight:600, position:"sticky", left:0, background:"#faf9f7", zIndex:1, borderRight:"1px solid #ece8e2" }}>Day total</td>
+                                {DAYS.map(d => (
+                                  <td key={d} style={{ padding:"5px 10px", textAlign:"center", fontSize:11, color:"#a09488", borderLeft:"1px solid #ece8e2" }}>
+                                    {(weeklyStats.dayTotals[d] || 0) > 0 ? "100%" : "—"}
+                                  </td>
+                                ))}
+                                <td style={{ padding:"5px 10px", textAlign:"center", fontSize:11, color:"#a09488", borderLeft:"1px solid #e5e2dd" }}>100%</td>
+                              </tr>
+                              {/* Each day's share of the week */}
+                              <tr style={{ background:"#f5f3f0", borderTop:"1.5px solid #e5e2dd" }}>
+                                <td style={{ padding:"7px 14px", fontWeight:700, fontSize:10.5, color:"#5a524c", textTransform:"uppercase", letterSpacing:"0.04em", position:"sticky", left:0, background:"#ece8e2", zIndex:1 }}>% of Week</td>
+                                {DAYS.map(d => {
+                                  const dayTot = weeklyStats.dayTotals[d] || 0;
+                                  const pct = weeklyStats.weekTotal > 0 ? (dayTot / weeklyStats.weekTotal) * 100 : 0;
+                                  const alpha = pct > 0 ? 0.08 + Math.min(1, pct / 25) * 0.45 : 0;
+                                  return (
+                                    <td key={d} style={{ padding:"7px 10px", textAlign:"center", fontWeight:700, color: pct>0?"#1a1a1a":"#c8c0b8", borderLeft:"1px solid #e5e2dd", background: pct>0 ? `rgba(232,89,12,${alpha.toFixed(2)})` : "transparent" }}>
+                                      {pct > 0 ? pct.toFixed(1) + "%" : "—"}
+                                    </td>
+                                  );
+                                })}
+                                <td style={{ padding:"7px 10px", textAlign:"center", fontWeight:700, color:"#e8590c", borderLeft:"1px solid #e5e2dd" }}>100%</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Day of week summary cards */}
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px,1fr))", gap:10, marginBottom:16 }}>
+                        {DAYS.map(d => {
+                          const total = weeklyStats?.dayTotals[d] || 0;
+                          const maxDay = Math.max(1, ...Object.values(weeklyStats?.dayTotals||{}));
+                          return (
+                            <div key={d} style={{ ...card, padding:"12px 14px" }}>
+                              <div style={{ fontSize:15, fontWeight:700, marginBottom:4 }}>{d}</div>
+                              <div style={{ fontSize:20, fontWeight:700, color:"#e8590c" }}>{total.toLocaleString()}</div>
+                              <div style={{ fontSize:11, color:"#a09488", marginBottom:8 }}>avg tasks / day</div>
+                              <div style={{ height:3, background:"#f0ede8", borderRadius:2 }}>
+                                <div style={{ height:"100%", width:`${(total/maxDay)*100}%`, background:"#e8590c", borderRadius:2 }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div style={{ ...card, padding:"12px 14px", borderColor:"#fbd5be", background:"#fff8f5" }}>
+                          <div style={{ fontSize:13, fontWeight:700, marginBottom:4, color:"#e8590c" }}>Week Total</div>
+                          <div style={{ fontSize:20, fontWeight:700, color:"#e8590c" }}>{weeklyStats?.weekTotal?.toLocaleString()}</div>
+                          <div style={{ fontSize:11, color:"#a09488" }}>avg tasks / week</div>
+                        </div>
+                      </div>
+
+                      {/* Format hint */}
+                      <div style={{ fontSize:11, color:"#a09488", lineHeight:1.7 }}>
+                        CSV format: first column = hours (<b>12am … 11pm</b>), then one column per date across the top (<b>DD/MM/YYYY</b>). Download the template for the exact layout.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+                        {/* ═══ GAP ANALYSIS TAB ═══ */}
+            {activeTab === "gap" && (() => {
+              // Build gap data: current - required (positive = excess, negative = short)
+              const gapData = {};
+              DAYS.forEach(d => {
+                gapData[d] = {};
+                HOURS.forEach(h => {
+                  const required = Math.ceil(selectedTeam === null ? results[d][h].agents : (results[d][h].teamSplit[selectedTeam]?.agents || 0));
+                  const current = parseFloat(currentResourcing[d][h]) || 0;
+                  const hasRequired = required > 0;
+                  const hasCurrent = current > 0;
+                  gapData[d][h] = { required, current, gap: hasCurrent || hasRequired ? current - required : null };
+                });
+                gapData[d]._reqTotal = HOURS.reduce((s,h) => s + gapData[d][h].required, 0);
+                gapData[d]._curTotal = HOURS.reduce((s,h) => s + (parseFloat(currentResourcing[d][h])||0), 0);
+                gapData[d]._gapTotal = gapData[d]._curTotal - gapData[d]._reqTotal;
+              });
+
+              const gapColor = (gap) => {
+                if (gap === null) return "transparent";
+                if (gap > 0) return `rgba(47,158,68,${Math.min(0.6, 0.15 + gap * 0.08)})`;
+                if (gap < 0) return `rgba(201,42,42,${Math.min(0.6, 0.15 + Math.abs(gap) * 0.08)})`;
+                return "rgba(200,200,200,0.15)";
+              };
+              const gapTextColor = (gap) => {
+                if (gap === null) return "#d0cbc4";
+                if (gap > 0) return "#2f9e44";
+                if (gap < 0) return "#c92a2a";
+                return "#8a8178";
+              };
+
+              const hasAnyResourcing = DAYS.some(d => HOURS.some(h => currentResourcing[d][h] !== ""));
+              const totalRequired = DAYS.reduce((s,d) => s + gapData[d]._reqTotal, 0);
+              const totalCurrent = DAYS.reduce((s,d) => s + gapData[d]._curTotal, 0);
+              const totalGap = totalCurrent - totalRequired;
+
+              function exportGapCSV() {
+                const teamLabel = selectedTeam !== null ? teams[selectedTeam].name : "All Teams";
+                const lines = [];
+                lines.push("GAP ANALYSIS EXPORT");
+                lines.push(`Required based on,${teamLabel}`);
+                lines.push(`Admin time (mins/hr),${params.adminTime}`);
+                taskTypes.forEach(tt => lines.push(`${tt.name},${(agentProdMinutes/tt.aht).toFixed(1)} per hr per agent${tt.queued ? ` | live queue, max avg wait ${tt.asaTarget}s` : " | backlog work"}${tt.rework ? ` | rework ${DAYS.map(d=>d+" "+((tt.reworkPct&&tt.reworkPct[d])||0)+"%").join(" ")}` : ""}`));
+                lines.push(`Shrinkage (%),${params.shrinkage}`);
+                lines.push(`Productive mins/agent/hr,${agentProdMinutes.toFixed(1)}`);
+                lines.push("");
+                lines.push(`Total required,${totalRequired}`);
+                lines.push(`Total current,${totalCurrent}`);
+                lines.push(`Overall gap,${totalGap >= 0 ? "+" : ""}${totalGap}`);
+                lines.push("");
+
+                // Header rows
+                const h1 = ["Hour"];
+                const h2 = [""];
+                [...DAYS, "Total"].forEach(d => { h1.push(d, "", ""); h2.push("Required", "Current", "Gap"); });
+                lines.push(h1.join(","));
+                lines.push(h2.join(","));
+
+                HOURS.forEach(h => {
+                  const reqs = DAYS.map(d => gapData[d][h].required);
+                  const curs = DAYS.map(d => gapData[d][h].current);
+                  const tReq = reqs.reduce((a,b)=>a+b,0);
+                  const tCur = curs.reduce((a,b)=>a+b,0);
+                  if (tReq === 0 && tCur === 0) return;
+                  const row = [h];
+                  DAYS.forEach(d => {
+                    const g = gapData[d][h].gap;
+                    row.push(gapData[d][h].required, gapData[d][h].current, g === null ? "" : (g > 0 ? "+" + g : g));
+                  });
+                  const tGap = tCur - tReq;
+                  row.push(tReq, tCur, tGap > 0 ? "+" + tGap : tGap);
+                  lines.push(row.join(","));
+                });
+
+                const totalRow = ["Total"];
+                DAYS.forEach(d => {
+                  const g = gapData[d]._gapTotal;
+                  totalRow.push(gapData[d]._reqTotal, gapData[d]._curTotal, g > 0 ? "+" + g : g);
+                });
+                totalRow.push(totalRequired, totalCurrent, totalGap > 0 ? "+" + totalGap : totalGap);
+                lines.push(totalRow.join(","));
+
+                const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `gap-analysis-${teamLabel.replace(/\s+/g,"-").toLowerCase()}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }
+
+              return (
+                <div>
+                  {/* Header controls */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+                    <div>
+                      <div className="lxs" style={{ marginBottom: 4 }}>Gap Analysis — Required vs Current Resourcing</div>
+                      <div style={{ fontSize: 11.5, color: "#a09488" }}>Upload your current staffing levels, then see where you are over or under resourced by hour and day.</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                      {resourcingUploadError && <span style={{ fontSize: 11, color: resourcingUploadError.startsWith("⚠") ? "#c77c02" : "#e03131", maxWidth: 320 }}>{resourcingUploadError}</span>}
+                      <button className="upb" style={{ borderStyle: "dashed" }} onClick={() => downloadTemplate("resourcing")}>⬇ Template</button>
+                      <button className="upb" onClick={() => resourcingFileRef.current.click()}>⬆ Upload Current Resourcing CSV</button>
+                      <input ref={resourcingFileRef} type="file" accept=".csv,.tsv,.txt" style={{ display: "none" }} onChange={handleResourcingUpload} />
+                      <button className="upb" style={{ background:"#fff8f5", borderColor:"#fbd5be", color:"#e8590c" }}
+                        onClick={exportGapCSV}>⬇ Export CSV</button>
+                      {hasAnyResourcing && (
+                        <button className="upb" style={{ color: "#c92a2a", borderColor: "#f5c6c6" }}
+                          onClick={() => { const v={}; DAYS.forEach(d=>{v[d]={};HOURS.forEach(h=>{v[d][h]="";})}); setCurrentResourcing(v); }}>
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Team filter */}
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 12, color: "#8a8178", fontWeight: 500 }}>Required based on:</span>
+                    <button className={`tgb ${selectedTeam === null ? "on" : ""}`} onClick={() => setSelectedTeam(null)}>All teams</button>
+                    {teams.map((t, i) => (
+                      <button key={i} className={`tgb ${selectedTeam === i ? "on" : ""}`}
+                        style={selectedTeam === i ? { background: t.color || TEAM_COLORS[i % TEAM_COLORS.length], borderColor: t.color || TEAM_COLORS[i % TEAM_COLORS.length] } : {}}
+                        onClick={() => setSelectedTeam(selectedTeam === i ? null : i)}>{t.name}</button>
+                    ))}
+                  </div>
+
+                  {/* Summary chips */}
+                  {hasAnyResourcing && (
+                    <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+                      {[
+                        ["Total Required", totalRequired, "#e8590c"],
+                        ["Total Current", totalCurrent, "#1971c2"],
+                        ["Overall Gap", (totalGap >= 0 ? "+" : "") + totalGap, totalGap > 0 ? "#2f9e44" : totalGap < 0 ? "#c92a2a" : "#8a8178"],
+                      ].map(([l, v, c]) => (
+                        <div key={l} className="chip">
+                          <span style={{ color: "#a09488" }}>{l}: </span>
+                          <span style={{ fontWeight: 700, color: c }}>{v}</span>
+                        </div>
+                      ))}
+                      <div className="chip">
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ width: 10, height: 10, borderRadius: 2, background: "rgba(47,158,68,0.5)", display: "inline-block" }} />
+                          <span style={{ color: "#a09488" }}>Excess &nbsp;</span>
+                          <span style={{ width: 10, height: 10, borderRadius: 2, background: "rgba(201,42,42,0.5)", display: "inline-block" }} />
+                          <span style={{ color: "#a09488" }}>Short &nbsp;</span>
+                          <span style={{ width: 10, height: 10, borderRadius: 2, background: "rgba(200,200,200,0.3)", display: "inline-block" }} />
+                          <span style={{ color: "#a09488" }}>Balanced</span>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Three-row table: Required / Current / Gap */}
+                  {!hasAnyResourcing ? (
+                    <div style={{ ...card, padding: 40, textAlign: "center" }}>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: "#5a524c", marginBottom: 8 }}>No current resourcing data uploaded</div>
+                      <div style={{ fontSize: 13, color: "#a09488", marginBottom: 16 }}>Upload a CSV with your current staffing levels (same format as task volume — hours as rows, days as columns).</div>
+                      <button className="upb" style={{ borderStyle: "dashed" }} onClick={() => downloadTemplate("resourcing")}>⬇ Template</button>
+                      <button className="upb" onClick={() => resourcingFileRef.current.click()}>⬆ Upload Current Resourcing CSV</button>
+                    </div>
+                  ) : (
+                    <div style={{ ...card, overflow: "hidden" }}>
+                      <div style={{ overflowX: "auto" }}>
+                        <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12 }}>
+                          <thead>
+                            <tr style={{ background: "#f5f3f0", position: "sticky", top: 0, zIndex: 2 }}>
+                              <th style={{ padding: "8px 14px", textAlign: "left", fontSize: 10.5, fontWeight: 700, color: "#a09488", letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1.5px solid #e5e2dd", position: "sticky", left: 0, background: "#f5f3f0", zIndex: 3, whiteSpace: "nowrap" }}>Hour</th>
+                              {DAYS.map(d => (
+                                <th key={d} colSpan={3} style={{ padding: "8px 6px", textAlign: "center", fontSize: 11, fontWeight: 700, color: "#1a1a1a", borderBottom: "1.5px solid #e5e2dd", borderLeft: "1px solid #e5e2dd", minWidth: 150 }}>{d}</th>
+                              ))}
+                              <th colSpan={3} style={{ padding: "8px 6px", textAlign: "center", fontSize: 11, fontWeight: 700, color: "#e8590c", borderBottom: "1.5px solid #e5e2dd", borderLeft: "1px solid #e5e2dd", minWidth: 120 }}>Total</th>
+                            </tr>
+                            <tr style={{ background: "#faf9f7", position: "sticky", top: "33px", zIndex: 2 }}>
+                              <th style={{ position: "sticky", left: 0, background: "#faf9f7", zIndex: 3, borderBottom: "1px solid #e5e2dd" }} />
+                              {[...DAYS, "Total"].map(d => (
+                                <React.Fragment key={d}>
+                                  <th style={{ padding: "3px 6px", fontSize: 10, fontWeight: 600, color: "#e8590c", textAlign: "center", borderBottom: "1px solid #e5e2dd", borderLeft: "1px solid #ece8e2" }}>Req</th>
+                                  <th style={{ padding: "3px 6px", fontSize: 10, fontWeight: 600, color: "#1971c2", textAlign: "center", borderBottom: "1px solid #e5e2dd" }}>Cur</th>
+                                  <th style={{ padding: "3px 6px", fontSize: 10, fontWeight: 600, color: "#8a8178", textAlign: "center", borderBottom: "1px solid #e5e2dd" }}>Gap</th>
+                                </React.Fragment>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {HOURS.map((h, hi) => {
+                              const rowRequired = DAYS.map(d => gapData[d][h].required);
+                              const rowCurrent = DAYS.map(d => gapData[d][h].current);
+                              const anyData = DAYS.some(d => gapData[d][h].gap !== null);
+                              if (!anyData && rowRequired.every(r => r === 0)) return null;
+                              const totalReq = rowRequired.reduce((a,b)=>a+b,0);
+                              const totalCur = rowCurrent.reduce((a,b)=>a+b,0);
+                              const totalGapRow = totalCur - totalReq;
+                              return (
+                                <tr key={h} style={{ background: hi % 2 === 0 ? "#fff" : "#fdfcfb" }}>
+                                  <td style={{ padding: "6px 14px", fontWeight: 600, fontSize: 12, color: "#5a524c", whiteSpace: "nowrap", position: "sticky", left: 0, background: hi % 2 === 0 ? "#fff" : "#fdfcfb", zIndex: 1, borderRight: "1px solid #ece8e2" }}>{h}</td>
+                                  {DAYS.map(d => {
+                                    const g = gapData[d][h].gap;
+                                    return (
+                                      <React.Fragment key={d}>
+                                        <td style={{ padding: "5px 8px", textAlign: "center", borderLeft: "1px solid #ece8e2", color: gapData[d][h].required > 0 ? "#e8590c" : "#d0cbc4", fontWeight: 500 }}>
+                                          {gapData[d][h].required > 0 ? gapData[d][h].required : "—"}
+                                        </td>
+                                        <td style={{ padding: "5px 8px", textAlign: "center", color: gapData[d][h].current > 0 ? "#1971c2" : "#d0cbc4", fontWeight: 500 }}>
+                                          {gapData[d][h].current > 0 ? gapData[d][h].current : "—"}
+                                        </td>
+                                        <td style={{ padding: "5px 8px", textAlign: "center", background: gapColor(g), fontWeight: 700, color: gapTextColor(g), fontSize: 12 }}>
+                                          {g !== null ? (g === 0 ? "=" : (g > 0 ? "+" : "") + g) : "—"}
+                                        </td>
+                                      </React.Fragment>
+                                    );
+                                  })}
+                                  <React.Fragment>
+                                    <td style={{ padding: "5px 8px", textAlign: "center", borderLeft: "1px solid #e5e2dd", color: totalReq > 0 ? "#e8590c" : "#d0cbc4", fontWeight: 600 }}>{totalReq > 0 ? totalReq : "—"}</td>
+                                    <td style={{ padding: "5px 8px", textAlign: "center", color: totalCur > 0 ? "#1971c2" : "#d0cbc4", fontWeight: 600 }}>{totalCur > 0 ? totalCur : "—"}</td>
+                                    <td style={{ padding: "5px 8px", textAlign: "center", background: gapColor(totalGapRow), fontWeight: 700, color: gapTextColor(totalGapRow) }}>
+                                      {totalReq > 0 || totalCur > 0 ? (totalGapRow === 0 ? "=" : (totalGapRow > 0 ? "+" : "") + totalGapRow) : "—"}
+                                    </td>
+                                  </React.Fragment>
+                                </tr>
+                              );
+                            })}
+                            <tr style={{ background: "#f5f3f0", borderTop: "1.5px solid #e5e2dd" }}>
+                              <td style={{ padding: "7px 14px", fontWeight: 700, fontSize: 10.5, color: "#5a524c", textTransform: "uppercase", letterSpacing: "0.04em", position: "sticky", left: 0, background: "#ece8e2", zIndex: 1 }}>Total</td>
+                              {DAYS.map(d => {
+                                const g = gapData[d]._gapTotal;
+                                return (
+                                  <React.Fragment key={d}>
+                                    <td style={{ padding: "7px 8px", textAlign: "center", fontWeight: 700, color: "#e8590c", borderLeft: "1px solid #e5e2dd" }}>{gapData[d]._reqTotal || "—"}</td>
+                                    <td style={{ padding: "7px 8px", textAlign: "center", fontWeight: 700, color: "#1971c2" }}>{gapData[d]._curTotal || "—"}</td>
+                                    <td style={{ padding: "7px 8px", textAlign: "center", fontWeight: 700, color: gapTextColor(g), background: gapColor(g) }}>
+                                      {gapData[d]._reqTotal > 0 || gapData[d]._curTotal > 0 ? (g === 0 ? "=" : (g > 0 ? "+" : "") + g) : "—"}
+                                    </td>
+                                  </React.Fragment>
+                                );
+                              })}
+                              <React.Fragment>
+                                <td style={{ padding: "7px 8px", textAlign: "center", fontWeight: 700, color: "#e8590c", borderLeft: "1px solid #e5e2dd" }}>{totalRequired || "—"}</td>
+                                <td style={{ padding: "7px 8px", textAlign: "center", fontWeight: 700, color: "#1971c2" }}>{totalCurrent || "—"}</td>
+                                <td style={{ padding: "7px 8px", textAlign: "center", fontWeight: 700, color: gapTextColor(totalGap), background: gapColor(totalGap) }}>
+                                  {totalGap === 0 ? "=" : (totalGap > 0 ? "+" : "") + totalGap}
+                                </td>
+                              </React.Fragment>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* ═══ SHIFTS TAB ═══ */}
+            {activeTab === "shifts" && (() => {
+
+              // Hour index helpers
+              const hIdx = h => HOURS.indexOf(h);
+              const hLabel = idx => idx < 24 ? HOURS[idx] : HOURS[idx - 24] + "+";
+
+              // Build shifts for a given demand array + window
+              function buildShifts(demandArr, windowStart, windowEnd, minH, maxH) {
+                const raw = [];
+                let i = windowStart;
+                while (i < windowEnd) {
+                  if ((demandArr[i] || 0) === 0) { i++; continue; }
+                  let j = i;
+                  while (j < windowEnd && (demandArr[j] || 0) > 0) j++;
+                  let cursor = i;
+                  while (cursor < j) {
+                    let len = Math.min(maxH, j - cursor);
+                    if (len < minH) len = j - cursor < minH ? j - cursor : minH;
+                    const end = Math.min(cursor + len, windowEnd);
+                    const peak = Math.max(...demandArr.slice(cursor, end).filter(Boolean));
+                    if (peak > 0) raw.push({ start: cursor, end, duration: end - cursor, agents: peak });
+                    cursor += len;
+                  }
+                  i = j;
+                }
+                // merge adjacent same-agents within maxH
+                const merged = [];
+                raw.forEach(s => {
+                  const last = merged[merged.length - 1];
+                  if (last && last.end === s.start && last.agents === s.agents && (s.end - last.start) <= maxH)
+                    { last.end = s.end; last.duration = last.end - last.start; }
+                  else merged.push({...s});
+                });
+                return merged.map(s => ({
+                  ...s,
+                  startLabel: HOURS[s.start % 24],
+                  endLabel: hLabel(s.end),
+                }));
+              }
+
+              const minH = shiftRules.minHours !== "" ? parseInt(shiftRules.minHours) : 4;
+              const maxH = shiftRules.maxHours !== "" ? parseInt(shiftRules.maxHours) : 12;
+
+              // For each team-window, for each day it covers, build demand and shifts
+              function getWindowResults(tw) {
+                const startH = tw.startHour;
+                const endH = tw.endHour; // may be > 23 for overnight e.g. 25 = 1am next day
+                const coversDays = DAYS.filter((_, di) => tw.days.includes(di));
+                const dayResults = {};
+                coversDays.forEach(day => {
+                  // Build demand array 0-47 to handle overnight
+                  const demand = Array.from({length: 48}, (_, hi) => {
+                    const h = HOURS[hi % 24];
+                    const v = tw.teamIdx === null
+                      ? results[day][h].agents
+                      : (results[day][h].teamSplit[tw.teamIdx]?.agents || 0);
+                    return Math.ceil(v);
+                  });
+                  const shifts = buildShifts(demand, startH, endH, minH, maxH);
+                  const totalAgentHours = shifts.reduce((s, sh) => s + sh.agents * sh.duration, 0);
+                  dayResults[day] = { shifts, totalAgentHours };
+                });
+                return { coversDays, dayResults };
+              }
+
+              // ── Render ────────────────────────────────────────────────────
+              const ShiftCard = ({ day, shifts, totalAgentHours, windowStart, windowEnd, color }) => (
+                <div style={{ background: "#fff", border: "1px solid #e5e2dd", borderRadius: 10, overflow: "hidden" }}>
+                  <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid #f0ede8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontSize: 15, fontWeight: 700 }}>{day}</div>
+                    <div style={{ fontSize: 11, color: "#a09488" }}>
+                      {shifts.length} shift{shifts.length !== 1 ? "s" : ""} · {totalAgentHours} agent-hrs
+                    </div>
+                  </div>
+                  {shifts.length === 0
+                    ? <div style={{ padding: "14px", fontSize: 12, color: "#c0b8b0", textAlign: "center" }}>No demand</div>
+                    : <div style={{ padding: "10px 14px" }}>
+                        <div style={{ position: "relative", height: 8, background: "#f5f3f0", borderRadius: 4, marginBottom: 10, overflow: "hidden" }}>
+                          {shifts.map((sh, si) => (
+                            <div key={si} style={{
+                              position: "absolute", top: 0, height: "100%",
+                              left: `${(sh.start / 24) * 100}%`,
+                              width: `${(sh.duration / 24) * 100}%`,
+                              background: color || `rgba(232,89,12,${0.4 + si * 0.15})`,
+                              borderRadius: 3, opacity: 0.7 + si * 0.1,
+                            }} />
+                          ))}
+                        </div>
+                        {shifts.map((sh, si) => (
+                          <div key={si} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0", borderBottom: si < shifts.length - 1 ? "1px solid #f5f3f0" : "none" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                              <div style={{ width: 9, height: 9, borderRadius: 2, background: color || "#e8590c", flexShrink: 0, opacity: 0.7 + si * 0.1 }} />
+                              <span style={{ fontSize: 12.5, fontWeight: 600, color: "#1a1a1a" }}>{sh.startLabel} – {sh.endLabel}</span>
+                              <span style={{ fontSize: 11, color: "#a09488" }}>{sh.duration}hr</span>
+                            </div>
+                            <div>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: "#e8590c" }}>{sh.agents}</span>
+                              <span style={{ fontSize: 11, color: "#a09488", marginLeft: 3 }}>agents</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                  }
+                </div>
+              );
+
+              return (
+                <div>
+                  {/* Shift rules — full width at top */}
+                  <div style={{ background: "#fff", border: "1px solid #e5e2dd", borderRadius: 10, padding: 16, marginBottom: 20, display: "flex", gap: 32, alignItems: "flex-start", flexWrap: "wrap" }}>
+                    <div style={{ flex: "0 0 auto" }}>
+                      <div className="lxs">Shift Rules <span style={{ fontWeight: 400, letterSpacing: 0, textTransform: "none", color: "#b0a89e", fontSize: 10 }}>(optional)</span></div>
+                      {[
+                        { key: "minHours", label: "Min shift duration (hrs)", ph: "e.g. 4" },
+                        { key: "maxHours", label: "Max shift duration (hrs)", ph: "e.g. 8" },
+                      ].map(({ key, label, ph }) => (
+                        <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 9, gap: 16 }}>
+                          <label style={{ fontSize: 12, color: "#5a524c" }}>{label}</label>
+                          <input type="number" min={1} max={24} className="pi" style={{ width: 70 }}
+                            value={shiftRules[key]} placeholder={ph}
+                            onChange={e => setShiftRules(r => ({ ...r, [key]: e.target.value }))} />
+                        </div>
+                      ))}
+                      <div style={{ fontSize: 11, color: "#a09488" }}>Defaults: 4hr min, 12hr max</div>
+                    </div>
+                  </div>
+
+                  {/* ── Grand total summary bar ── */}
+                  {(() => {
+                    const allTotals = teamWindows.map(tw => {
+                      const { coversDays, dayResults } = getWindowResults(tw);
+                      const total = coversDays.reduce((s, day) => s + dayResults[day].totalAgentHours, 0);
+                      return { id: tw.id, name: tw.name, color: tw.color, total };
+                    });
+                    const grandTotal = allTotals.reduce((s, t) => s + t.total, 0);
+                    const filteredTotal = activeWindowFilter !== null
+                      ? (allTotals.find(t => t.id === activeWindowFilter)?.total || 0)
+                      : grandTotal;
+                    return (
+                      <div style={{ background: "#fff", border: "1px solid #e5e2dd", borderRadius: 10, padding: "14px 18px", marginBottom: 16 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                          <div>
+                            <div className="lxs" style={{ marginBottom: 2 }}>Total Agent-Hours</div>
+                            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                              <span style={{ fontSize: 28, fontWeight: 700, color: activeWindowFilter !== null ? (allTotals.find(t => t.id === activeWindowFilter)?.color || "#e8590c") : "#1a1a1a" }}>{filteredTotal}</span>
+                              <span style={{ fontSize: 13, color: "#a09488" }}>agent-hrs {activeWindowFilter !== null ? "(filtered)" : "across all windows"}</span>
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                            <span style={{ fontSize: 11.5, color: "#8a8178", fontWeight: 500 }}>Filter:</span>
+                            <button
+                              className={`tgb ${activeWindowFilter === null ? "on" : ""}`}
+                              onClick={() => setActiveWindowFilter(null)}>All</button>
+                            {allTotals.map(t => (
+                              <button key={t.id}
+                                className={`tgb ${activeWindowFilter === t.id ? "on" : ""}`}
+                                style={activeWindowFilter === t.id ? { background: t.color, borderColor: t.color } : {}}
+                                onClick={() => setActiveWindowFilter(activeWindowFilter === t.id ? null : t.id)}>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                                  <span style={{ width: 8, height: 8, borderRadius: 2, background: t.color, display: "inline-block", flexShrink: 0 }} />
+                                  {t.name}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Stacked bar */}
+                        <div style={{ height: 8, background: "#f5f3f0", borderRadius: 4, overflow: "hidden", display: "flex" }}>
+                          {allTotals.filter(t => t.total > 0).map(t => (
+                            <div key={t.id} style={{
+                              height: "100%",
+                              width: `${grandTotal > 0 ? (t.total / grandTotal) * 100 : 0}%`,
+                              background: t.color,
+                              opacity: activeWindowFilter === null || activeWindowFilter === t.id ? 1 : 0.2,
+                              transition: "opacity 0.2s",
+                            }} />
+                          ))}
+                        </div>
+                        {grandTotal > 0 && (
+                          <div style={{ display: "flex", gap: 14, marginTop: 8, flexWrap: "wrap" }}>
+                            {allTotals.filter(t => t.total > 0).map(t => (
+                              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, opacity: activeWindowFilter === null || activeWindowFilter === t.id ? 1 : 0.4, transition: "opacity 0.2s" }}>
+                                <div style={{ width: 8, height: 8, borderRadius: 2, background: t.color, flexShrink: 0 }} />
+                                <span style={{ color: "#5a524c" }}>{t.name}:</span>
+                                <span style={{ fontWeight: 600, color: t.color }}>{t.total}</span>
+                                <span style={{ color: "#a09488" }}>({grandTotal > 0 ? Math.round((t.total/grandTotal)*100) : 0}%)</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Team windows + results — one row per window */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <div className="lxs" style={{ marginBottom: 0 }}>Team Windows &amp; Suggested Shift Patterns</div>
+                      <button className="atb" onClick={() => setTeamWindows(tw => [...tw, {
+                        id: Date.now(), name: "New Team Window", color: "#888",
+                        days: [0,1,2,3,4], startHour: 9, endHour: 17, teamIdx: null
+                      }])}>+ Add team window</button>
+                    </div>
+                    {teamWindows.length === 0 && (
+                      <div style={{ padding: 32, textAlign: "center", color: "#a09488", fontSize: 13, background: "#fff", border: "1px solid #e5e2dd", borderRadius: 10 }}>
+                        Add a team window to see suggested shift patterns
+                      </div>
+                    )}
+                    {teamWindows.filter(tw => activeWindowFilter === null || tw.id === activeWindowFilter).map((tw, wi) => {
+                      const { coversDays, dayResults } = getWindowResults(tw);
+                      return (
+                        <div key={tw.id} style={{ background: "#fff", border: `1.5px solid ${tw.color}22`, borderLeft: `4px solid ${tw.color}`, borderRadius: 10, overflow: "hidden" }}>
+                          {/* Row header: window config */}
+                          <div style={{ display: "flex", gap: 0, alignItems: "stretch" }}>
+                            {/* Config panel */}
+                            <div style={{ width: 300, flexShrink: 0, padding: 14, borderRight: "1px solid #f0ede8", background: "#faf9f7" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                <input className="ti" style={{ flex: 1, marginRight: 8, fontWeight: 600, fontSize: 12 }}
+                                  value={tw.name}
+                                  onChange={e => setTeamWindows(tws => tws.map((t, i) => i === wi ? {...t, name: e.target.value} : t))} />
+                                <input type="color" value={tw.color} style={{ width: 24, height: 24, border: "none", background: "none", cursor: "pointer", padding: 0 }}
+                                  onChange={e => setTeamWindows(tws => tws.map((t, i) => i === wi ? {...t, color: e.target.value} : t))} />
+                                <button className="rm" style={{ marginLeft: 4 }}
+                                  onClick={() => setTeamWindows(tws => tws.filter((_, i) => i !== wi))}>×</button>
+                              </div>
+                              {/* Days */}
+                              <div style={{ display: "flex", gap: 3, marginBottom: 8, flexWrap: "wrap" }}>
+                                {DAYS.map((d, di) => (
+                                  <button key={d}
+                                    onClick={() => setTeamWindows(tws => tws.map((t, i) => i === wi ? {
+                                      ...t, days: t.days.includes(di) ? t.days.filter(x => x !== di) : [...t.days, di].sort()
+                                    } : t))}
+                                    style={{
+                                      padding: "2px 6px", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer",
+                                      background: tw.days.includes(di) ? tw.color : "#fff",
+                                      color: tw.days.includes(di) ? "#fff" : "#8a8178",
+                                      border: `1.5px solid ${tw.days.includes(di) ? tw.color : "#ddd9d3"}`,
+                                    }}>{d}</button>
+                                ))}
+                              </div>
+                              {/* Hours */}
+                              <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
+                                <span style={{ fontSize: 11, color: "#a09488", width: 28, flexShrink: 0 }}>From</span>
+                                <select className="ti" style={{ flex: 1, fontSize: 11 }}
+                                  value={tw.startHour}
+                                  onChange={e => setTeamWindows(tws => tws.map((t, i) => i === wi ? {...t, startHour: parseInt(e.target.value)} : t))}>
+                                  {Array.from({length: 24}, (_, hi) => <option key={hi} value={hi}>{HOURS[hi]}</option>)}
+                                </select>
+                                <span style={{ fontSize: 11, color: "#a09488", width: 12, textAlign: "center" }}>to</span>
+                                <select className="ti" style={{ flex: 1, fontSize: 11 }}
+                                  value={tw.endHour}
+                                  onChange={e => setTeamWindows(tws => tws.map((t, i) => i === wi ? {...t, endHour: parseInt(e.target.value)} : t))}>
+                                  {Array.from({length: 24}, (_, hi) => <option key={hi+1} value={hi+1}>{hi + 1 < 24 ? HOURS[hi+1] : "12am (next)"}</option>)}
+                                  <option value={25}>1am (next)</option>
+                                  <option value={26}>2am (next)</option>
+                                  <option value={27}>3am (next)</option>
+                                  <option value={28}>4am (next)</option>
+                                  <option value={29}>5am (next)</option>
+                                  <option value={30}>6am (next)</option>
+                                  <option value={31}>7am (next)</option>
+                                  <option value={32}>8am (next)</option>
+                                  <option value={33}>9am (next)</option>
+                                  <option value={34}>10am (next)</option>
+                                  <option value={35}>11am (next)</option>
+                                  <option value={36}>12pm (next)</option>
+                                  <option value={37}>1pm (next)</option>
+                                </select>
+                              </div>
+                              {/* Team filter */}
+                              <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
+                                <span style={{ fontSize: 11, color: "#a09488", marginRight: 2 }}>Team:</span>
+                                <button
+                                  onClick={() => setTeamWindows(tws => tws.map((t, i) => i === wi ? {...t, teamIdx: null} : t))}
+                                  style={{ padding: "2px 7px", borderRadius: 4, fontSize: 11, cursor: "pointer", fontWeight: 600,
+                                    background: tw.teamIdx === null ? "#1a1a1a" : "#fff",
+                                    color: tw.teamIdx === null ? "#fff" : "#8a8178",
+                                    border: `1.5px solid ${tw.teamIdx === null ? "#1a1a1a" : "#ddd9d3"}` }}>All</button>
+                                {teams.map((t, ti) => (
+                                  <button key={ti}
+                                    onClick={() => setTeamWindows(tws => tws.map((tw2, i) => i === wi ? {...tw2, teamIdx: tw2.teamIdx === ti ? null : ti} : tw2))}
+                                    style={{ padding: "2px 7px", borderRadius: 4, fontSize: 11, cursor: "pointer", fontWeight: 600,
+                                      background: tw.teamIdx === ti ? TEAM_COLORS[ti % TEAM_COLORS.length] : "#fff",
+                                      color: tw.teamIdx === ti ? "#fff" : "#8a8178",
+                                      border: `1.5px solid ${tw.teamIdx === ti ? TEAM_COLORS[ti % TEAM_COLORS.length] : "#ddd9d3"}` }}>{t.name}</button>
+                                ))}
+                              </div>
+                            </div>
+                            {/* Results for this window */}
+                            <div style={{ flex: 1, padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                                {coversDays.length === 0
+                                  ? <div style={{ fontSize: 12, color: "#c0b8b0", alignSelf: "center", padding: "0 12px" }}>Select days to see shifts</div>
+                                  : coversDays.map(day => (
+                                      <ShiftCard key={day} day={day}
+                                        shifts={dayResults[day].shifts}
+                                        totalAgentHours={dayResults[day].totalAgentHours}
+                                        windowStart={tw.startHour} windowEnd={tw.endHour}
+                                        color={tw.color} />
+                                    ))
+                                }
+                              </div>
+                              {coversDays.length > 0 && (() => {
+                                const windowTotal = coversDays.reduce((s, day) => s + dayResults[day].totalAgentHours, 0);
+                                return (
+                                  <div style={{ borderTop: "1px solid #f0ede8", paddingTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                                    <div style={{ width: 10, height: 10, borderRadius: 2, background: tw.color, flexShrink: 0 }} />
+                                    <span style={{ fontSize: 12, color: "#5a524c", fontWeight: 600 }}>{tw.name} total:</span>
+                                    <span style={{ fontSize: 15, fontWeight: 700, color: tw.color }}>{windowTotal}</span>
+                                    <span style={{ fontSize: 12, color: "#a09488" }}>agent-hrs across {coversDays.length} day{coversDays.length !== 1 ? "s" : ""}</span>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                </div>
+              );
+            })()}
+
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
